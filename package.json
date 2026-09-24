@@ -1,0 +1,35 @@
+{
+  "name": "kindmetrics-cli-collector-ui",
+  "version": "0.2.0",
+  "private": true,
+  "description": "KindMetrics Collector UI",
+  "type": "module",
+  "scripts": {
+    "dev": "quasar dev",
+    "build": "quasar build",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.17.0",
+    "axios": "^1.11.0",
+    "quasar": "^2.29.0",
+    "vue": "^3.5.18",
+    "vue-i18n": "^11.1.9",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@quasar/app-vite": "^2.6.2",
+    "@types/node": "^22.15.0",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
+    "eslint": "^9.35.0",
+    "eslint-plugin-vue": "^10.4.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.44.0",
+    "vue-tsc": "^2.2.12"
+  }
+}

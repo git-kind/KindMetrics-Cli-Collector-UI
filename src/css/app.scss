@@ -1,0 +1,38 @@
+:root {
+  --km-primary: #0b6170;
+  --km-secondary: #123b49;
+  --km-background: #061923;
+  --km-surface: #0a202b;
+  --km-border: #294551;
+  --km-text: #f4f8fa;
+  --km-muted: #8ca6b2;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--km-background);
+  color: var(--km-text);
+  font-family: Inter, Roboto, Arial, sans-serif;
+}
+
+.q-layout,
+.q-page-container,
+.q-page {
+  background: var(--km-background);
+  color: var(--km-text);
+}
+
+.km-card {
+  background: var(--km-surface);
+  border: 1px solid var(--km-border);
+  color: var(--km-text);
+}
+
+.km-muted {
+  color: var(--km-muted);
+}
+
+.km-primary-bg {
+  background: var(--km-primary);
+}
