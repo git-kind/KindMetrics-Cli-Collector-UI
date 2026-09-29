@@ -1,49 +1,43 @@
-# KindMetrics-Cli-Collector-UI
+KindMetrics-Cli-Collector-UI
 
-Frontend de administración de la instalación cliente de **KindMetrics** y configuración de adquisición de datos.
+1. Propósito
 
-## 1. Stack obligatorio
+KindMetrics-Cli-Collector-UI es la interfaz de administración del Collector de KindMetrics.
 
-Todo Frontend de KindMetrics utiliza:
+Su responsabilidad principal es permitir configurar y administrar la adquisición de información desde equipos y sistemas de telefonía hacia el almacenamiento utilizado por KindMetrics.
 
-- Vue 3.
-- Quasar.
-- Composition API.
-- TypeScript.
-- `<script setup lang="ts">`.
-- Vue Router.
-- Vue I18n.
-- ESLint.
-- Prettier.
-- Sin Pinia.
+La UI no ejecuta directamente procesos de adquisición, protocolos, consultas a equipos ni conexiones directas a MySQL. Esas responsabilidades pertenecen al KindMetrics-Cli-Collector-API y a sus procesos de ejecución.
 
-No utilizar Options API para código nuevo.
+2. Stack obligatorio
 
-## 2. Responsabilidad
+Vue 3
 
-Este proyecto administra la instalación cliente y su configuración de adquisición.
+Quasar
 
-```text
-Equipment
-    ↓
-Origin
-    ↓
-Extraction Method
-    ↓
-Collector
-    ↓
-Mapping
-    ↓
-Storage
-```
+Composition API
 
-La ejecución real de conectores, protocolos, extracción y tareas de background pertenece a `KindMetrics-Cli-Collector-API` y `KindMetrics-Cli-BS`.
+TypeScript
 
-El Frontend no implementa drivers, Scheduler, CRON, protocolos de equipos ni acceso directo a MySQL.
+<script setup>
 
-## 3. Arquitectura Frontend
+Vue Router
 
-```text
+Vue I18n
+
+Axios cuando exista integración con API
+
+ESLint
+
+Prettier
+
+No utilizar Pinia.
+
+No agregar dependencias nuevas sin justificación técnica.
+
+3. Arquitectura
+
+Mantener:
+
 Page
   ↓
 Component
@@ -51,106 +45,498 @@ Component
 Service
   ↓
 Repository
-  ├── Mock
-  └── API (futuro)
-```
+  ↓
+MockRepository / API Repository
 
-La UI debe poder pasar de Mock a API sin reescribir Pages y Components.
+Las Pages deben encargarse principalmente de composición, navegación y contexto.
 
-## 4. Mock inicial
+La lógica de negocio no debe concentrarse en Pages ni templates.
 
-El proyecto incluye pantallas Mock funcionales para:
+4. Cadena de adquisición
 
-- Login.
-- Resumen.
-- Equipment.
-- Origins.
-- Extraction Methods.
-- Collectors.
-- Mappings.
-- Storage.
-- Settings.
+Equipment
+   ↓
+Origin
+   ↓
+ExtractionMethod
+   ↓
+Collector
+   ↓
+Mapping / Transformation
+   ↓
+Storage
 
-El resumen muestra el flujo completo de adquisición y datos de ejemplo de una instalación cliente.
+La UI configura estos elementos, pero no ejecuta directamente drivers, protocolos, SNMP, APIs de equipos ni procesos de adquisición.
 
-Credenciales Mock:
+5. Identidad de Company y archivo de configuración
 
-```text
-Usuario: admin
-Contraseña: admin123
-```
+La Company se crea desde KindMetrics-UI.
 
-Estas credenciales son exclusivamente de desarrollo y deben desaparecer al conectar el API real.
+Cada Company posee un GUID único:
 
-## 5. Multiidioma
+Company.id
 
-Se utiliza Vue I18n con cambio de idioma en runtime:
+Ese GUID será utilizado como nombre del archivo de configuración del Collector:
 
-- Español (`es`).
-- English (`en`).
+{CompanyId}.cfg
 
-El cambio de idioma no requiere recargar la aplicación.
+Ejemplo:
 
-Los identificadores internos y los datos de negocio no se traducen automáticamente.
+7f8c2a91-4f12-4a6d-b123-9c1e8d7f1234.cfg
 
-## 6. Themes y Skins
+Por ahora:
 
-La interfaz incorpora el mismo concepto de configuración visual utilizado por KindMetrics-UI:
+No existe InstallationId.
 
-- Theme: estructura visual general.
-- Skin: identidad cromática.
-- Branding: identidad de la empresa.
+No se contemplan múltiples instalaciones de una misma Company.
 
-El Skin Default utiliza como base el **azul petróleo oscuro**.
+No se agrega una entidad Installation.
 
-Incluye inicialmente:
+La instalación queda asociada a la Company mediante CompanyId.
 
-- Default.
-- Midnight.
-- Slate.
+Estas posibilidades quedan fuera del alcance actual.
 
-La selección se conserva en `localStorage` como preferencia local del Front Mock.
+6. Primera ejecución
 
-## 7. Branding y logos
+El flujo conceptual es:
 
-El proyecto mantiene una capa de Branding separada de Theme/Skin.
+Inicio
+  ↓
+Buscar configuración {CompanyId}.cfg
+  ↓
+¿Existe?
+  │
+  ├── NO
+  │    ↓
+  │  Configuración inicial
+  │    ↓
+  │  Solicitar/validar CompanyId
+  │    ↓
+  │  Configurar empresa
+  │    ↓
+  │  Configurar conexión a Base de Datos
+  │    ↓
+  │  Probar conexión
+  │    ↓
+  │  Guardar {CompanyId}.cfg
+  │    ↓
+  │  Login
+  │
+  └── SÍ
+       ↓
+     Cargar configuración
+       ↓
+     Login
+       ↓
+     Dashboard
 
-El Mock incluye el logo de **KIND Technologies** utilizado visualmente en KindMetrics-UI como referencia de marca.
+La UI no debe acceder directamente al sistema de archivos.
 
-El logo de Company está modelado como dato de branding (`CompanyBranding`) para que posteriormente pueda provenir del API sin modificar Layouts o Components.
+La existencia, lectura y escritura del .cfg pertenecen al runtime/API del Collector.
 
-No se debe asumir que todas las empresas utilizan el logo de KIND Technologies.
+7. Configuración inicial
 
-## 8. Login
+El wizard debe permitir configurar como mínimo:
 
-El Login es Mock en esta etapa.
+Company
 
-El router protege las rutas de la aplicación y redirige a `/login` cuando no existe una sesión Mock.
+CompanyId
 
-La autenticación definitiva será responsabilidad del API local y/o del mecanismo de autenticación que se defina para la instalación cliente.
+Código
 
-La UI no debe considerarse la frontera de seguridad.
+Nombre
 
-## 9. Documentación global
+El CompanyId debe corresponder al GUID generado previamente desde KindMetrics-UI.
 
-La fuente de verdad global continúa siendo:
+La UI no debe generar arbitrariamente una nueva Company desde este flujo.
 
-```text
-../docs/
-```
+Base de datos
 
-No crear una segunda carpeta `docs` dentro de este proyecto.
+Debe contemplar los datos necesarios para la conexión a la base de datos de monitoreo:
 
-Las decisiones de arquitectura, negocio, seguridad, Collector, Storage, ingestión y contratos compartidos deben revisarse contra la documentación global.
+Host
+Port
+Database
+Username
+Password
+SSL / opciones de conexión
 
-## 10. Regla de desarrollo
+Los campos definitivos deben respetar el contrato real del Collector API.
 
-Cuando una definición del dominio todavía esté pendiente, no inventar campos ni contratos definitivos. El Mock puede utilizar datos mínimos exclusivamente para validar navegación y UX.
+Prueba de conexión
 
-Las modificaciones sobre código existente deben ser mínimas y respetar:
+Debe existir una acción para probar la conexión antes de completar la instalación.
 
-- TypeScript.
-- ESLint.
-- Arquitectura por capas.
-- Vue 3 + Quasar + Composition API + `<script setup>`.
-- Compatibilidad Mock → API.
+Datos de conexión
+       ↓
+Probar conexión
+       ↓
+Resultado
+       ├── Éxito
+       └── Error
+
+No debe marcarse la instalación como configurada si la validación requerida falla.
+
+8. Archivo de configuración
+
+El archivo .cfg pertenece al entorno del Collector, no al navegador.
+
+La UI nunca debe:
+
+leer directamente archivos del sistema operativo;
+
+escribir directamente el .cfg;
+
+conectarse directamente a MySQL;
+
+almacenar credenciales de base de datos en localStorage/sessionStorage.
+
+La comunicación será conceptualmente:
+
+KindMetrics-Cli-Collector-UI
+          │
+          │ HTTP
+          ▼
+KindMetrics-Cli-Collector-API
+          │
+          ├── InstallationService
+          ├── ConfigurationService
+          └── AuthenticationService
+                     │
+                     ▼
+               {CompanyId}.cfg
+
+El API/runtime es responsable de persistir la configuración y proteger las credenciales.
+
+9. Estado de instalación
+
+La UI debe manejar conceptualmente:
+
+NOT_CONFIGURED
+CONFIGURING
+CONFIGURED
+ERROR
+
+Mientras no exista API real, estos estados pueden simularse mediante Mock.
+
+Arquitectura:
+
+InstallationRepository
+        ↓
+MockInstallationRepository
+        ↓
+InstallationService
+        ↓
+Pages / Components
+
+Posteriormente:
+
+InstallationRepository
+        ↓
+ApiInstallationRepository
+        ↓
+KindMetrics-Cli-Collector-API
+
+Pages y Components no deben requerir una reescritura para cambiar Mock por API.
+
+10. Login
+
+Instalación y autenticación son responsabilidades diferentes.
+
+La configuración responde:
+
+¿Está configurada esta instalación?
+
+El login responde:
+
+¿Puede este usuario acceder al sistema?
+
+Por lo tanto:
+
+Configuración
+      ↓
+Company / conexión
+      ↓
+Login
+      ↓
+Usuario autenticado
+
+La existencia de {CompanyId}.cfg no sustituye la autenticación.
+
+11. Escenario Cloud
+
+En Cloud:
+
+Login
+  ↓
+KindMetrics-API
+  ↓
+Usuario autenticado
+  ↓
+UserCompanyAccess
+  ↓
+Empresas disponibles
+  ↓
+Seleccionar Company
+  ↓
+Contexto Company
+  ↓
+Dashboard
+
+La autoridad de seguridad corresponde al KindMetrics-API.
+
+El navegador nunca debe asumir que puede acceder a una Company simplemente porque conoce su GUID.
+
+12. Multiempresa
+
+Company es el tenant de KindMetrics.
+
+Company.id es un GUID.
+
+No se utilizará un prefijo de tablas como mecanismo principal de multi-tenancy.
+
+La seguridad multi-tenant pertenece al API.
+
+La UI no debe implementar reglas de autorización como autoridad final.
+
+13. Navegación
+
+Después del login debe existir un menú persistente:
+
+Dashboard
+
+Adquisición
+  ├── Equipos
+  ├── Orígenes
+  ├── Métodos de extracción
+  ├── Collectors
+  └── Mappings
+
+Almacenamiento
+
+Configuración
+  ├── Empresa
+  ├── Base de datos
+  └── General
+
+Durante una instalación no configurada, el usuario debe ser dirigido al flujo de instalación.
+
+Después de completar la instalación:
+
+Installation → Login → Dashboard
+
+La instalación no debe ser un módulo permanente del menú cuando ya está configurada, salvo que posteriormente se defina una necesidad administrativa.
+
+14. Rutas conceptuales
+
+/login
+/installation
+/dashboard
+/equipment
+/origins
+/extraction-methods
+/collectors
+/mappings
+/storage
+/settings
+
+La estructura exacta puede adaptarse a la implementación actual.
+
+15. Protección de rutas
+
+Conceptualmente:
+
+                    Inicio
+                      │
+                      ▼
+              Installation Status
+                      │
+            ┌─────────┴─────────┐
+            │                   │
+      NOT_CONFIGURED         CONFIGURED
+            │                   │
+            ▼                   ▼
+     Installation            Login
+                                  │
+                                  ▼
+                              Dashboard
+
+Si el estado es NOT_CONFIGURED, las rutas protegidas deben redirigir a /installation.
+
+Si está configurado, debe continuar el flujo normal de Login.
+
+La protección definitiva debe coordinarse con el API.
+
+16. Mock
+
+Mientras el Collector API no esté integrado, utilizar Mock Repositories.
+
+Debe poder simular:
+
+instalación no configurada;
+
+CompanyId;
+
+datos de empresa;
+
+configuración de base de datos;
+
+prueba de conexión;
+
+instalación configurada;
+
+login;
+
+Company actual;
+
+navegación.
+
+No simular conexiones reales a MySQL desde el navegador.
+
+17. Branding y Skins
+
+Mantener:
+
+Logo KIND Technologies
+
+Branding de Company
+
+Nombre de Company
+
+Idioma
+
+Skin
+
+Skin Default:
+
+Azul petróleo oscuro
+
+No modificar la arquitectura funcional al cambiar de skin.
+
+18. Internacionalización
+
+Toda cadena visible debe utilizar Vue I18n:
+
+títulos;
+
+menús;
+
+botones;
+
+labels;
+
+placeholders;
+
+mensajes de validación;
+
+errores;
+
+éxito;
+
+instalación;
+
+configuración;
+
+login;
+
+navegación.
+
+El idioma debe cambiar en runtime sin reload ni pérdida de estado.
+
+Los datos de negocio no se traducen automáticamente:
+
+Company.name
+Company.code
+Equipment.name
+Origin.name
+Collector.name
+Metric.name
+
+19. Seguridad
+
+La UI no es autoridad de seguridad.
+
+La seguridad real corresponde a:
+
+KindMetrics-Cli-Collector-API
+
+y cuando corresponda:
+
+KindMetrics-API
+
+No almacenar credenciales reales innecesariamente en localStorage/sessionStorage.
+
+20. Referencias
+
+KindMetrics utiliza como referencias:
+
+Grafana
+
+Apache Superset
+
+Se consideran referencias para navegación, dashboards, consultas, visualización y UX.
+
+No copiar su arquitectura interna.
+
+El Collector tiene una responsabilidad específica de adquisición de datos de telefonía y voz.
+
+21. Fuera del alcance actual
+
+No implementar:
+
+InstallationId;
+
+múltiples instalaciones de una Company;
+
+prefijos de tablas como mecanismo de multi-tenancy;
+
+drivers reales de equipos dentro de Vue;
+
+ejecución directa de SNMP/API/protocolos desde Vue;
+
+conexión directa de Vue a MySQL;
+
+permisos finales del Collector que todavía no estén definidos;
+
+contratos de API no aprobados;
+
+entidades de dominio que todavía no tengan definición aprobada.
+
+22. Principio general
+
+KindMetrics-UI
+    Administración global
+    Companies
+    Usuarios
+    Dashboards
+    Configuración global
+          │
+          ▼
+KindMetrics-API
+    Seguridad
+    Multi-tenant
+    Empresas
+    Usuarios
+    Permisos
+          │
+
+KindMetrics-Cli-Collector-UI
+    Configuración y administración del Collector
+          │
+          ▼
+KindMetrics-Cli-Collector-API
+    Configuración local
+    Archivo {CompanyId}.cfg
+    Conexiones
+    Ejecución de adquisición
+          │
+          ▼
+Collector / BackgroundService
+    Adquisición
+    Normalización
+    Persistencia
+          │
+          ▼
+Monitoring Database
+
+La UI debe permanecer desacoplada de los detalles físicos de ejecución y almacenamiento.

@@ -3,16 +3,14 @@ import { useI18n } from 'vue-i18n';
 import { getSkin } from '../themes/skins';
 import type { SkinId } from '../types/ui';
 
-const STORAGE_SKIN = 'kindmetrics-collector-skin';
-const STORAGE_LOCALE = 'kindmetrics-collector-locale';
-
+const dark = ref(false);
 const skin = ref<SkinId>('default');
 
 export function useUi() {
   const { locale } = useI18n();
   const currentSkin = computed(() => getSkin(skin.value));
 
-  function applySkin(id: SkinId) {
+  function applySkin(id: SkinId): void {
     skin.value = id;
     const selected = getSkin(id);
     const root = document.documentElement;
@@ -23,25 +21,35 @@ export function useUi() {
     root.style.setProperty('--km-border', selected.border);
     root.style.setProperty('--km-text', selected.text);
     root.style.setProperty('--km-muted', selected.muted);
-    localStorage.setItem(STORAGE_SKIN, id);
+    localStorage.setItem('kindmetrics.ui.skin', id);
   }
 
-  function setLanguage(value: string) {
+  function toggleDark(): void {
+    dark.value = !dark.value;
+    sessionStorage.setItem('kindmetrics.ui.dark', String(dark.value));
+  }
+
+  function setLocale(value: string): void {
     locale.value = value;
-    localStorage.setItem(STORAGE_LOCALE, value);
+    sessionStorage.setItem('kindmetrics.ui.locale', value);
   }
 
   onMounted(() => {
-    const savedSkin = localStorage.getItem(STORAGE_SKIN) as SkinId | null;
-    const savedLocale = localStorage.getItem(STORAGE_LOCALE);
-    applySkin(savedSkin ?? 'default');
+    dark.value = sessionStorage.getItem('kindmetrics.ui.dark') === 'true';
+    const savedLocale = sessionStorage.getItem('kindmetrics.ui.locale');
     if (savedLocale) locale.value = savedLocale;
+    const savedSkin = localStorage.getItem('kindmetrics.ui.skin') as SkinId | null;
+    applySkin(savedSkin ?? 'default');
   });
 
   return {
+    dark,
+    locale,
     skin,
     currentSkin,
     applySkin,
-    setLanguage,
+    toggleDark,
+    setLocale,
+    setLanguage: setLocale,
   };
 }

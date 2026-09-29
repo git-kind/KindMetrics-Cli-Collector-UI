@@ -16,6 +16,7 @@ export default configure(() => ({
     },
   },
   devServer: {
+    port: 9001,
     open: false,
   },
   framework: {

@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuth } from '../../composables/useAuth';
+import { useAuth } from '../../composables/useAuthorization';
 import { useUi } from '../../composables/useUi';
 import { skins } from '../../themes/skins';
 import type { SkinId } from '../../types/ui';

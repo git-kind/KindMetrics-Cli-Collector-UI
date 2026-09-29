@@ -13,23 +13,26 @@ export function useAuth() {
   const isAuthenticated = computed(() => authenticated.value);
 
   async function login(user: string, password: string): Promise<boolean> {
-    if (user.trim() !== 'admin' || password !== 'admin123') {
+    if (user.trim() !== 'admin' || password.length <= 6) {
       return false;
     }
     username.value = user;
     authenticated.value = true;
     sessionStorage.setItem('kindmetrics-collector-auth', '1');
+    sessionStorage.setItem('kindmetrics-collector-user', user.trim());
     return true;
   }
 
   function restore() {
     authenticated.value = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
+    username.value = sessionStorage.getItem('kindmetrics-collector-user') ?? '';
   }
 
   function logout() {
     authenticated.value = false;
     username.value = '';
     sessionStorage.removeItem('kindmetrics-collector-auth');
+    sessionStorage.removeItem('kindmetrics-collector-user');
   }
 
   return {
@@ -40,4 +43,13 @@ export function useAuth() {
     restore,
     logout,
   };
+}
+
+export function useAuthorization() {
+  function can(permission: string): boolean {
+    const authenticated = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
+    return authenticated && ['dashboard.view', 'user.view'].includes(permission);
+  }
+
+  return { can };
 }

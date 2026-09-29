@@ -1,16 +1,31 @@
 import { createRouter as createVueRouter, createWebHistory } from 'vue-router';
+import { installationService } from '../services/installation.service';
 
 const routes = [
   {
-    path: '/login',
-    name: 'login',
-    component: () => import('../pages/auth/LoginPage.vue'),
+    path: '/',
+    component: () => import('layouts/LoginLayout.vue'),
+    children: [
+      { path: '', redirect: '/login' },
+      { path: 'login', name: 'login', meta: { public: true }, component: () => import('../pages/auth/LoginPage.vue') },
+      {
+        path: 'installation',
+        name: 'installation',
+        meta: { public: true },
+        component: () => import('../pages/auth/InstallationPage.vue'),
+      },
+      {
+        path: 'auth/loginPage',
+        name: 'login-component',
+        meta: { public: true },
+        component: () => import('../components/login/LoginComponent.vue'),
+      },
+    ]
   },
   {
     path: '/',
-    component: () => import('../layouts/MainLayout.vue'),
+    component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', redirect: '/dashboard' },
       { path: 'dashboard', name: 'dashboard', component: () => import('../pages/DashboardPage.vue') },
       { path: 'equipment', name: 'equipment', component: () => import('../pages/EquipmentPage.vue') },
       { path: 'origins', name: 'origins', component: () => import('../pages/OriginsPage.vue') },
@@ -29,12 +44,20 @@ export function createRouter() {
     routes,
   });
 
-  router.beforeEach((to) => {
+  router.beforeEach(async (to) => {
+    const status = await installationService.getStatus();
+    if (status !== 'CONFIGURED' && to.name !== 'installation') {
+      return { name: 'installation', query: to.query };
+    }
+    if (status === 'CONFIGURED' && to.name === 'installation') return { name: 'login' };
+    if (to.meta.public) return true;
+
     const authenticated = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
-    if (to.name !== 'login' && !authenticated) return { name: 'login' };
-    if (to.name === 'login' && authenticated) return { name: 'dashboard' };
+    if (!authenticated) return { name: 'login', query: to.query };
     return true;
   });
 
   return router;
 }
+
+export default createRouter;
