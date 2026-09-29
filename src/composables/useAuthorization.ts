@@ -48,7 +48,15 @@ export function useAuth() {
 export function useAuthorization() {
   function can(permission: string): boolean {
     const authenticated = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
-    return authenticated && ['dashboard.view', 'user.view'].includes(permission);
+    return authenticated && [
+      'dashboard.view',
+      'user.view',
+      'collector.view',
+      'collector.create',
+      'collector.edit',
+      'collector.execute',
+      'collector.delete',
+    ].includes(permission);
   }
 
   return { can };

@@ -23,6 +23,45 @@ body {
   color: var(--km-text);
 }
 
+.km-card,
+.q-card,
+.q-table,
+.q-banner,
+.q-list,
+.q-item,
+.q-menu,
+.q-dialog__inner > .q-card {
+  background: var(--km-surface);
+  color: var(--km-text);
+  border-color: var(--km-border);
+}
+
+.q-card,
+.q-table,
+.q-banner,
+.q-list,
+.q-item {
+  box-shadow: none;
+}
+
+.q-card__section,
+.q-card__actions,
+.q-table th,
+.q-table td,
+.q-item,
+.q-item__content,
+.q-banner {
+  color: var(--km-text);
+}
+
+.q-table thead th,
+.q-table tbody td,
+.q-table__bottom {
+  background: var(--km-surface);
+  color: var(--km-text);
+  border-color: var(--km-border);
+}
+
 .km-card {
   background: var(--km-surface);
   border: 1px solid var(--km-border);

@@ -31,6 +31,7 @@ const routes = [
       { path: 'origins', name: 'origins', component: () => import('../pages/OriginsPage.vue') },
       { path: 'extraction-methods', name: 'extraction-methods', component: () => import('../pages/ExtractionMethodsPage.vue') },
       { path: 'collectors', name: 'collectors', component: () => import('../pages/CollectorsPage.vue') },
+      { path: 'collectors/:id', name: 'collector-detail', component: () => import('../pages/CollectorDetailPage.vue') },
       { path: 'mappings', name: 'mappings', component: () => import('../pages/MappingsPage.vue') },
       { path: 'storage', name: 'storage', component: () => import('../pages/StoragePage.vue') },
       { path: 'settings', name: 'settings', component: () => import('../pages/settings/SettingsPage.vue') },
