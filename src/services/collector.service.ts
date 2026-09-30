@@ -167,7 +167,13 @@ export class CollectorService {
 }
 
 const auth = useAuth();
+function getActiveCompanyId(): string {
+  const companyId = auth.company.value?.id;
+  if (!companyId) throw new Error('Active Company context is required.');
+  return companyId;
+}
+
 export const collectorService = new CollectorService(
   mockCollectorRepository,
-  () => auth.company.value.id,
+  getActiveCompanyId,
 );

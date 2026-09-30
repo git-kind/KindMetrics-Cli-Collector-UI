@@ -24,7 +24,7 @@
       <div class="eyebrow">{{ t('installation.eyebrow') }}</div>
       <h1>{{ t('installation.title') }}</h1>
       <p>{{ t('installation.subtitle') }}</p>
-      <q-badge :color="status === 'ERROR' ? 'negative' : 'warning'" class="q-mt-sm">
+      <q-badge v-if="mode !== 'KIND'" :color="status === 'ERROR' ? 'negative' : 'warning'" class="q-mt-sm">
         {{ t(status === 'ERROR' ? 'installation.status.error' : 'installation.status.notConfigured') }}
       </q-badge>
     </div>
@@ -34,9 +34,17 @@
       {{ t('installation.status.error') }}
     </q-banner>
 
-    <q-stepper v-model="step" flat animated color="primary" class="installation-stepper">
+    <q-stepper
+      v-else-if="mode === 'CUSTOMER' || isKindCompanySetup"
+      v-model="step"
+      flat
+      animated
+      color="primary"
+      class="installation-stepper"
+    >
       <q-step :name="1" :title="t('installation.steps.company')" icon="business" :done="step > 1">
         <InstallationCompanyStepComponent
+          v-if="mode === 'CUSTOMER'"
           :company-id="companyId"
           :company="company"
           :company-lookup-failed="companyLookupFailed"
@@ -44,11 +52,17 @@
           @resolve-company="resolveCompany"
           @continue="nextFromCompany"
         />
+        <CompanyCreateComponent
+          v-else
+          @created="onKindCompanyCreated"
+          @cancel="returnToCompanySelection"
+        />
       </q-step>
 
       <q-step :name="2" :title="t('installation.steps.database')" icon="storage" :done="step > 2">
         <InstallationDatabaseStepComponent
           :database="database"
+          :readonly="isKindCompanySetup"
           @update:database="updateDatabase"
           @back="step = 1"
           @continue="nextFromDatabase"
@@ -81,9 +95,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 import kindLogo from 'src/assets/Kind-Logo.png';
+import CompanyCreateComponent from 'src/components/company/CompanyCreateComponent.vue';
+import type { Company } from 'src/models/company';
 import InstallationCompanyStepComponent from './InstallationCompanyStepComponent.vue';
 import InstallationConnectionStepComponent from './InstallationConnectionStepComponent.vue';
 import InstallationDatabaseStepComponent from './InstallationDatabaseStepComponent.vue';
@@ -93,26 +110,26 @@ import type {
   ConnectionTestState,
   DatabaseConfiguration,
   InstallationCompany,
+  InstallationMode,
   InstallationStatus,
 } from 'src/models/installation';
 import { installationService } from 'src/services/installation.service';
 
-const emit = defineEmits<{ configured: [] }>();
+const emit = defineEmits<{
+  configured: [mode: InstallationMode, companyId?: string];
+}>();
 const { t, locale } = useI18n();
 const { currentSkin, setLanguage } = useUi();
+const route = useRoute();
+const router = useRouter();
+const mode = ref<InstallationMode | null>(null);
+const isKindCompanySetup = computed(() => mode.value === 'KIND' && route.query.createCompany === '1');
 const step = ref(1);
 const status = ref<InstallationStatus>('NOT_CONFIGURED');
 const companyId = ref('7f8c2a91-4f12-4a6d-b123-9c1e8d7f1234');
 const company = ref<InstallationCompany | null>(null);
 const companyLookupFailed = ref(false);
-const database = reactive<DatabaseConfiguration>({
-  host: 'localhost',
-  port: 3306,
-  database: 'kindmetrics_demo',
-  username: 'collector_demo',
-  password: 'demo-password',
-  ssl: false,
-});
+const database = reactive<DatabaseConfiguration>({ databaseName: 'KindMetrics_PatitoFeo' });
 const connectionState = ref<ConnectionTestState>('idle');
 const connectionMessageKey = ref('installation.connection.success');
 const saving = ref(false);
@@ -129,15 +146,32 @@ watch(database, () => {
 onMounted(async () => {
   try {
     status.value = await installationService.getStatus();
-    await resolveCompany();
+    mode.value = await installationService.getMode();
+    if (mode.value === 'CUSTOMER') await resolveCompany();
   } catch {
     status.value = 'ERROR';
   }
 });
 
+function onKindCompanyCreated(createdCompany: Company): void {
+  company.value = {
+    id: createdCompany.id,
+    code: createdCompany.code,
+    name: createdCompany.name,
+    databaseName: createdCompany.databaseName,
+  };
+  database.databaseName = createdCompany.databaseName;
+  step.value = 2;
+}
+
+function returnToCompanySelection(): void {
+  void router.push({ name: 'company-select' });
+}
+
 async function resolveCompany(): Promise<void> {
   try {
     company.value = await installationService.findCompany(companyId.value);
+    if (company.value) database.databaseName = company.value.databaseName;
   } catch {
     company.value = null;
   }
@@ -175,6 +209,11 @@ async function saveConfiguration(): Promise<void> {
   saving.value = true;
   saveFailed.value = false;
   try {
+    if (isKindCompanySetup.value) {
+      emit('configured', 'KIND', company.value.id);
+      return;
+    }
+
     const configured = await installationService.saveConfiguration({
       companyId: company.value.id,
       database: { ...database },
@@ -185,7 +224,7 @@ async function saveConfiguration(): Promise<void> {
       return;
     }
     status.value = 'CONFIGURED';
-    emit('configured');
+    emit('configured', 'CUSTOMER', company.value.id);
   } catch {
     saveFailed.value = true;
     status.value = 'ERROR';

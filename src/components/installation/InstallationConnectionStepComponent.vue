@@ -6,20 +6,8 @@
     <p class="step-description">{{ t('installation.connection.description') }}</p>
     <div class="connection-summary">
       <div>
-        <span>{{ t('installation.database.host') }}</span>
-        <strong>{{ database.host }}:{{ database.port }}</strong>
-      </div>
-      <div>
-        <span>{{ t('installation.database.database') }}</span>
-        <strong>{{ database.database }}</strong>
-      </div>
-      <div>
-        <span>{{ t('installation.database.username') }}</span>
-        <strong>{{ database.username }}</strong>
-      </div>
-      <div>
-        <span>{{ t('installation.database.ssl') }}</span>
-        <strong>{{ t(database.ssl ? 'common.enabled' : 'common.disabled') }}</strong>
+        <span>{{ t('installation.database.databaseName') }}</span>
+        <strong>{{ database.databaseName }}</strong>
       </div>
     </div>
     <div class="mock-hint">{{ t('installation.connection.mockHint') }}</div>
@@ -44,7 +32,7 @@
           outline
           color="primary"
           :loading="state === 'testing'"
-          :label="t('installation.connection.test')"
+          :label="t('installation.connection.validate')"
           icon="cable"
           @click="emit('test')"
         />

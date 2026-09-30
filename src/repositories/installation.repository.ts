@@ -1,13 +1,16 @@
 import type {
   ConnectionTestResult,
-  InstallationCompany,
   InstallationConfiguration,
+  InstallationMode,
   InstallationStatus,
 } from '../models/installation';
 
 export interface InstallationRepository {
   getStatus(): Promise<InstallationStatus>;
-  findCompany(companyId: string): Promise<InstallationCompany | null>;
+  getMode(): Promise<InstallationMode | null>;
+  setMode(mode: InstallationMode): Promise<void>;
+  getConfiguredCompanyId(): Promise<string | null>;
+  getConfiguredDatabaseName(): Promise<string | null>;
   testConnection(database: InstallationConfiguration['database']): Promise<ConnectionTestResult>;
   saveConfiguration(configuration: InstallationConfiguration): Promise<boolean>;
 }

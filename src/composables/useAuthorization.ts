@@ -1,13 +1,10 @@
 import { computed, ref } from 'vue';
-import type { CompanyBranding } from '../types/ui';
+import type { Company } from '../models/company';
 
 const authenticated = ref(false);
 const username = ref('');
-const company = ref<CompanyBranding>({
-  id: 'demo',
-  name: 'PatitoFeo',
-  logo: '/kind-logo.png',
-});
+const activeCompany = ref<Company | null>(null);
+const companyContextKey = 'kindmetrics-active-company';
 
 export function useAuth() {
   const isAuthenticated = computed(() => authenticated.value);
@@ -26,11 +23,33 @@ export function useAuth() {
   function restore() {
     authenticated.value = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
     username.value = sessionStorage.getItem('kindmetrics-collector-user') ?? '';
+    const savedCompany = sessionStorage.getItem(companyContextKey);
+    if (savedCompany) {
+      try {
+        activeCompany.value = JSON.parse(savedCompany) as Company;
+      } catch {
+        sessionStorage.removeItem(companyContextKey);
+        activeCompany.value = null;
+      }
+    } else {
+      activeCompany.value = null;
+    }
+  }
+
+  function setActiveCompany(value: Company): void {
+    activeCompany.value = { ...value };
+    sessionStorage.setItem(companyContextKey, JSON.stringify(value));
+  }
+
+  function clearActiveCompany(): void {
+    sessionStorage.removeItem(companyContextKey);
+    activeCompany.value = null;
   }
 
   function logout() {
     authenticated.value = false;
     username.value = '';
+    clearActiveCompany();
     sessionStorage.removeItem('kindmetrics-collector-auth');
     sessionStorage.removeItem('kindmetrics-collector-user');
   }
@@ -38,9 +57,11 @@ export function useAuth() {
   return {
     isAuthenticated,
     username,
-    company,
+    company: computed(() => activeCompany.value),
     login,
     restore,
+    setActiveCompany,
+    clearActiveCompany,
     logout,
   };
 }

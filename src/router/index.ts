@@ -6,7 +6,8 @@ const routes = [
     path: '/',
     component: () => import('layouts/LoginLayout.vue'),
     children: [
-      { path: '', redirect: '/login' },
+      { path: '', redirect: '/entry' },
+      { path: 'entry', name: 'entry', meta: { public: true }, component: () => import('../pages/auth/EntryPage.vue') },
       { path: 'login', name: 'login', meta: { public: true }, component: () => import('../pages/auth/LoginPage.vue') },
       {
         path: 'installation',
@@ -19,6 +20,16 @@ const routes = [
         name: 'login-component',
         meta: { public: true },
         component: () => import('../components/login/LoginComponent.vue'),
+      },
+      {
+        path: 'company/select',
+        name: 'company-select',
+        component: () => import('../pages/company/CompanySelectPage.vue'),
+      },
+      {
+        path: 'company/create',
+        name: 'company-create',
+        component: () => import('../pages/company/CompanyCreatePage.vue'),
       },
     ]
   },
@@ -46,15 +57,39 @@ export function createRouter() {
   });
 
   router.beforeEach(async (to) => {
+    const mode = await installationService.getMode();
     const status = await installationService.getStatus();
-    if (status !== 'CONFIGURED' && to.name !== 'installation') {
+    const effectiveMode = mode ?? (status === 'CONFIGURED' ? 'CUSTOMER' : null);
+    if (to.name === 'entry') return true;
+    if (to.name === 'installation') {
+      if (mode === null) return { name: 'entry' };
+      if (effectiveMode === 'KIND' && to.query.createCompany === '1') {
+        const authenticated = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
+        return authenticated ? true : { name: 'login' };
+      }
+      if (effectiveMode === 'KIND' || (effectiveMode === 'CUSTOMER' && status === 'CONFIGURED')) {
+        return { name: 'login' };
+      }
+      return true;
+    }
+    if (effectiveMode !== 'KIND' && status !== 'CONFIGURED') {
       return { name: 'installation', query: to.query };
     }
-    if (status === 'CONFIGURED' && to.name === 'installation') return { name: 'login' };
     if (to.meta.public) return true;
 
     const authenticated = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
     if (!authenticated) return { name: 'login', query: to.query };
+    const companySelected = sessionStorage.getItem('kindmetrics-active-company') !== null;
+    const companyRoutes = ['company-select', 'company-create'];
+    if (effectiveMode === 'KIND' && !companySelected && !companyRoutes.includes(String(to.name))) {
+      return { name: 'company-select' };
+    }
+    if (effectiveMode === 'CUSTOMER' && !companySelected) {
+      return { name: 'login' };
+    }
+    if (effectiveMode === 'CUSTOMER' && companyRoutes.includes(String(to.name))) {
+      return { name: 'dashboard' };
+    }
     return true;
   });
 

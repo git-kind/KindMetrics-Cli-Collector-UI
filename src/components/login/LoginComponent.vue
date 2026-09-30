@@ -98,11 +98,13 @@ import { useRouter } from 'vue-router';
 import kindLogo from 'src/assets/Kind-Logo.png';
 import { validateUsername, validatePassword } from 'src/helpers/login/loginHelper';
 import { useAuth } from 'src/composables/useAuthorization';
+import { installationService } from 'src/services/installation.service';
+import { companyService } from 'src/services/company.service';
 
 const $q = useQuasar();
 const { t } = useI18n();
 const router = useRouter();
-const { login } = useAuth();
+const { login, setActiveCompany, clearActiveCompany, logout } = useAuth();
 const username = ref('');
 const password = ref('');
 const rememberMe = ref(false);
@@ -133,7 +135,28 @@ async function onSubmit() {
       timeout: 1800,
     });
 
-    await router.push('/dashboard');
+    const mode = await installationService.getMode();
+    if (mode === 'KIND') {
+      clearActiveCompany();
+      await router.push({ name: 'company-select' });
+      return;
+    }
+
+    const configuredCompanyId = await installationService.getConfiguredCompanyId();
+    const companyRecord = configuredCompanyId
+      ? await companyService.getCompany(configuredCompanyId)
+      : (await companyService.listCompanies())[0] ?? null;
+    if (!companyRecord) {
+      logout();
+      $q.notify({ type: 'negative', message: t('companyContext.contextMissing') });
+      return;
+    }
+    const configuredDatabaseName = await installationService.getConfiguredDatabaseName();
+    const customerCompany = configuredDatabaseName
+      ? { ...companyRecord, databaseName: configuredDatabaseName }
+      : companyRecord;
+    setActiveCompany(customerCompany);
+    await router.push({ name: 'dashboard' });
     return;
   }
 

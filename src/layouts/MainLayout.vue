@@ -12,14 +12,20 @@
     >
       <q-toolbar>
         <q-btn class="km-header-leading-btn" flat dense round icon="menu" @click="mini = !mini" />
-        <img :src="company.logo" alt="KindMetrics" class="km-logo" />
+        <img v-if="company" :src="company.logo" alt="KindMetrics" class="km-logo" />
         <div class="km-brand">
           <div class="km-brand-title">{{ t('app.title') }}</div>
           <div class="text-caption km-muted">{{ t('app.subtitle') }}</div>
         </div>
         <q-space />
         <div class="km-header-actions">
-        <q-btn flat no-caps :label="company.name" icon="business">
+        <q-btn
+          class="km-company-context"
+          flat
+          no-caps
+          :label="`${t('companyContext.currentlyManaging')}: ${company?.name ?? ''}`"
+          icon="business"
+        >
             <q-menu
               dark
               content-class="km-header-menu"
@@ -33,9 +39,15 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>{{ t('common.company') }}</q-item-label>
-                  <q-item-label>{{ company.name }}</q-item-label>
+                  <q-item-label>{{ company?.name ?? '' }}</q-item-label>
                 </q-item-section>
               </q-item>
+              <template v-if="installationMode === 'KIND'">
+                <q-separator />
+                <q-item v-close-popup clickable :to="{ name: 'company-select' }">
+                  <q-item-section>{{ t('companyContext.switchCompany') }}</q-item-section>
+                </q-item>
+              </template>
             </q-list>
           </q-menu>
         </q-btn>
@@ -162,14 +174,6 @@
           <q-tooltip>{{ t('menu.acquisition') }}</q-tooltip>
         </q-expansion-item>
 
-        <q-item clickable :to="{ name: 'storage' }" active-class="km-active">
-          <q-item-section avatar>
-            <q-icon name="storage" />
-          </q-item-section>
-          <q-item-section>{{ t('menu.storage') }}</q-item-section>
-          <q-tooltip>{{ t('menu.storage') }}</q-tooltip>
-        </q-item>
-
         <q-expansion-item icon="settings" :label="t('menu.configuration')">
           <q-item clickable :to="{ name: 'settings' }" active-class="km-active" class="q-pl-xl">
             <q-item-section avatar>
@@ -194,12 +198,15 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuthorization';
 import { useUi } from '../composables/useUi';
+import type { InstallationMode } from '../models/installation';
+import { installationService } from '../services/installation.service';
 import { skins } from '../themes/skins';
 
 const { t, locale } = useI18n();
 const router = useRouter();
 const { company, username, logout: signOut, restore } = useAuth();
 const { applySkin, currentSkin, setLanguage } = useUi();
+const installationMode = ref<InstallationMode | null>(null);
 const drawer = ref(true);
 const mini = ref(false);
 const skinOptions = Object.values(skins);
@@ -207,13 +214,12 @@ const skinOptions = Object.values(skins);
 const acquisitionItems = [
   { route: 'equipment', label: 'menu.equipment', icon: 'dns' },
   { route: 'origins', label: 'menu.origins', icon: 'source' },
-  { route: 'extraction-methods', label: 'menu.extractionMethods', icon: 'api' },
   { route: 'collectors', label: 'menu.collectors', icon: 'sync_alt' },
-  { route: 'mappings', label: 'menu.mappings', icon: 'account_tree' },
 ];
 
-onMounted(() => {
+onMounted(async () => {
   restore();
+  installationMode.value = await installationService.getMode();
 });
 
 function logoutAndRedirect() {
@@ -279,6 +285,16 @@ const logout = logoutAndRedirect;
   color: #ffffff;
 }
 
+.km-header-actions :deep(.km-company-context) {
+  max-width: clamp(180px, 25vw, 320px);
+}
+
+.km-header-actions :deep(.km-company-context .q-btn__content) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .km-logo {
   width: 56px;
   height: 56px;
@@ -299,6 +315,10 @@ const logout = logoutAndRedirect;
   .km-logo {
     width: 46px;
     height: 46px;
+  }
+
+  .km-header-actions :deep(.km-company-context) {
+    max-width: 150px;
   }
 
   .km-brand {

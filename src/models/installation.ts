@@ -1,19 +1,16 @@
 export type InstallationStatus = 'NOT_CONFIGURED' | 'CONFIGURED' | 'ERROR';
+export type InstallationMode = 'CUSTOMER' | 'KIND';
 export type ConnectionTestState = 'idle' | 'testing' | 'success' | 'error';
 
 export interface InstallationCompany {
   id: string;
   code: string;
   name: string;
+  databaseName: string;
 }
 
 export interface DatabaseConfiguration {
-  host: string;
-  port: number;
-  database: string;
-  username: string;
-  password: string;
-  ssl: boolean;
+  databaseName: string;
 }
 
 export interface InstallationConfiguration {

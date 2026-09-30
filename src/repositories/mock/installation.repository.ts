@@ -1,18 +1,19 @@
 import type {
   ConnectionTestResult,
-  InstallationCompany,
   InstallationConfiguration,
+  InstallationMode,
   InstallationStatus,
 } from '../../models/installation';
 import type { InstallationRepository } from '../installation.repository';
 
-const mockCompany: InstallationCompany = {
-  id: '7f8c2a91-4f12-4a6d-b123-9c1e8d7f1234',
-  code: 'KIND-DEMO',
-  name: 'KindMetrics Demo Company',
-};
+const modeKey = 'kindmetrics.installation.mode';
+const statusKey = 'kindmetrics.installation.status';
+const customerCompanyKey = 'kindmetrics.installation.companyId';
+const customerDatabaseKey = 'kindmetrics.installation.databaseName';
 
 function getInitialStatus(): InstallationStatus {
+  const savedStatus = localStorage.getItem(statusKey);
+  if (savedStatus === 'CONFIGURED' || savedStatus === 'ERROR') return savedStatus;
   const requestedStatus = new URLSearchParams(globalThis.location?.search ?? '').get(
     'mockInstallation',
   );
@@ -30,18 +31,31 @@ export class MockInstallationRepository implements InstallationRepository {
     return this.status;
   }
 
-  async findCompany(companyId: string): Promise<InstallationCompany | null> {
-    await delay();
-    return companyId.toLowerCase() === mockCompany.id ? { ...mockCompany } : null;
+  async getMode(): Promise<InstallationMode | null> {
+    const mode = localStorage.getItem(modeKey);
+    return mode === 'CUSTOMER' || mode === 'KIND' ? mode : null;
+  }
+
+  async setMode(mode: InstallationMode): Promise<void> {
+    localStorage.setItem(modeKey, mode);
+  }
+
+  async getConfiguredCompanyId(): Promise<string | null> {
+    return localStorage.getItem(customerCompanyKey);
+  }
+
+  async getConfiguredDatabaseName(): Promise<string | null> {
+    return localStorage.getItem(customerDatabaseKey);
   }
 
   async testConnection(
     database: InstallationConfiguration['database'],
   ): Promise<ConnectionTestResult> {
     await delay();
-    const shouldFail = database.host.trim().toLowerCase() === 'connection-error';
+    const shouldFail = database.databaseName.trim().length === 0;
     this.validatedDatabase = shouldFail ? null : { ...database };
     this.status = shouldFail ? 'ERROR' : 'NOT_CONFIGURED';
+    localStorage.setItem(statusKey, this.status);
 
     return {
       success: !shouldFail,
@@ -60,6 +74,9 @@ export class MockInstallationRepository implements InstallationRepository {
     }
 
     this.status = 'CONFIGURED';
+    localStorage.setItem(statusKey, this.status);
+    localStorage.setItem(customerCompanyKey, configuration.companyId);
+    localStorage.setItem(customerDatabaseKey, configuration.database.databaseName);
     this.validatedDatabase = null;
     return true;
   }
