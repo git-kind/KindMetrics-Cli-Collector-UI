@@ -1,14 +1,24 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="km-header" :style="{ backgroundColor: currentSkin.secondary }">
+    <q-header
+      class="km-header"
+      :class="{ 'km-header--light': currentSkin.id === 'light' }"
+      :style="{
+        background: currentSkin.id === 'light'
+          ? `linear-gradient(90deg, ${currentSkin.surface} 0%, ${currentSkin.surface} 28%, ${currentSkin.secondary} 100%)`
+          : currentSkin.secondary,
+        color: currentSkin.text,
+      }"
+    >
       <q-toolbar>
-        <q-btn flat dense round icon="menu" @click="mini = !mini" />
+        <q-btn class="km-header-leading-btn" flat dense round icon="menu" @click="mini = !mini" />
         <img :src="company.logo" alt="KindMetrics" class="km-logo" />
         <div class="km-brand">
-          <div class="text-subtitle1 text-weight-bold">{{ t('app.title') }}</div>
+          <div class="km-brand-title">{{ t('app.title') }}</div>
           <div class="text-caption km-muted">{{ t('app.subtitle') }}</div>
         </div>
         <q-space />
+        <div class="km-header-actions">
         <q-btn flat no-caps :label="company.name" icon="business">
             <q-menu
               dark
@@ -107,6 +117,7 @@
             </q-list>
           </q-menu>
         </q-btn>
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -225,11 +236,74 @@ const logout = logoutAndRedirect;
   color: var(--km-text);
 }
 
+.km-header :deep(.q-toolbar) {
+  position: relative;
+  min-height: 84px;
+  padding: 0 24px;
+}
+
+.km-header--light .km-header-leading-btn,
+.km-header--light .km-brand {
+  color: #17272d;
+}
+
+.km-brand {
+  position: absolute;
+  left: 50%;
+  max-width: min(40vw, 420px);
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.km-brand-title {
+  color: var(--km-primary);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.km-header:not(.km-header--light) .km-brand-title {
+  color: var(--km-text);
+}
+
+.km-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.km-header-actions :deep(.q-btn) {
+  color: #ffffff;
+}
+
 .km-logo {
-  width: 42px;
-  height: 42px;
+  width: 56px;
+  height: 56px;
   margin-left: 12px;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
   object-fit: contain;
+}
+
+@media (max-width: 600px) {
+  .km-header :deep(.q-toolbar) {
+    min-height: 68px;
+    padding: 0 12px;
+  }
+
+  .km-logo {
+    width: 46px;
+    height: 46px;
+  }
+
+  .km-brand {
+    max-width: calc(100vw - 220px);
+  }
 }
 
 .km-drawer {

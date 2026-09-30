@@ -4,7 +4,7 @@ import { getSkin } from '../themes/skins';
 import type { SkinId } from '../types/ui';
 
 const dark = ref(false);
-const skin = ref<SkinId>('default');
+const skin = ref<SkinId>('light');
 
 export function useUi() {
   const { locale } = useI18n();
@@ -38,8 +38,11 @@ export function useUi() {
     dark.value = sessionStorage.getItem('kindmetrics.ui.dark') === 'true';
     const savedLocale = sessionStorage.getItem('kindmetrics.ui.locale');
     if (savedLocale) locale.value = savedLocale;
-    const savedSkin = localStorage.getItem('kindmetrics.ui.skin') as SkinId | null;
-    applySkin(savedSkin ?? 'default');
+    const savedSkin = localStorage.getItem('kindmetrics.ui.skin');
+    const selectedSkin: SkinId = savedSkin === 'dark' || savedSkin === 'midnight' || savedSkin === 'slate'
+      ? 'dark'
+      : 'light';
+    applySkin(selectedSkin);
   });
 
   return {

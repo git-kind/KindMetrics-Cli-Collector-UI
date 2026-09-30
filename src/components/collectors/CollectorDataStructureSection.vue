@@ -425,11 +425,12 @@ async function applyChanges(): Promise<void> {
 .collector-db-admin {
   display: grid;
   gap: 16px;
+  color: var(--km-text);
 }
 
 .db-splitter {
   min-height: 720px;
-  border: 1px solid var(--km-border, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--km-border);
   border-radius: 12px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.01);
@@ -439,7 +440,8 @@ async function applyChanges(): Promise<void> {
   height: 100%;
   padding: 16px;
   background: rgba(255, 255, 255, 0.02);
-  border-right: 1px solid var(--km-border, rgba(255, 255, 255, 0.08));
+  border-right: 1px solid var(--km-border);
+  color: var(--km-text);
 }
 
 .db-sidebar-header {
@@ -448,12 +450,23 @@ async function applyChanges(): Promise<void> {
 
 .db-tree {
   background: transparent;
+  color: var(--km-text);
+}
+
+:deep(.q-tree__node-content),
+:deep(.q-table thead th),
+:deep(.q-table tbody td),
+:deep(.q-item__label),
+:deep(.q-field__label),
+:deep(.q-field__native) {
+  color: var(--km-text) !important;
 }
 
 .empty-db-panel,
 .db-detail-panel {
   height: 100%;
   padding: 16px;
+  color: var(--km-text);
 }
 
 .empty-db-panel {
@@ -465,16 +478,17 @@ async function applyChanges(): Promise<void> {
 .db-status-banner {
   border-radius: 8px;
   background: rgba(76, 175, 80, 0.08);
-  color: var(--q-primary);
+  color: var(--km-text);
   padding: 10px 12px;
 }
 
 .db-tabs {
-  border-bottom: 1px solid var(--km-border, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid var(--km-border);
 }
 
 .db-table {
   border-radius: 10px;
   overflow: hidden;
+  color: var(--km-text);
 }
 </style>

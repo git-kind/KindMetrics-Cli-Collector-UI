@@ -9,6 +9,6 @@ import { useUi } from './composables/useUi';
 const { applySkin } = useUi();
 
 onMounted(() => {
-  applySkin('default');
+  applySkin('light');
 });
 </script>

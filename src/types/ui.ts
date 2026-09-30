@@ -1,4 +1,4 @@
-export type SkinId = 'default' | 'midnight' | 'slate';
+export type SkinId = 'light' | 'dark';
 
 export interface SkinDefinition {
   id: SkinId;

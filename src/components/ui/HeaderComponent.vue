@@ -4,8 +4,8 @@
       <div class="row items-center no-wrap q-gutter-sm">
         <img :src="kindLogo" alt="Kind Technologies logo" class="brand-logo" />
         <div>
-          <div class="text-subtitle1 text-weight-bold text-black">Kind Technologies</div>
-          <div class="text-caption text-grey-8">ARM Carga Routing</div>
+          <div class="text-subtitle1 text-weight-bold text-on-surface">Kind Technologies</div>
+          <div class="text-caption muted">ARM Carga Routing</div>
         </div>
       </div>
 
@@ -22,8 +22,9 @@ import kindLogo from 'src/assets/Kind-Logo.png';
 
 <style scoped lang="scss">
 .login-header {
-  background: linear-gradient(90deg, #ffffff 20%,  #d4e4ff 58%, #0e3b67 100%);
+  background: linear-gradient(90deg, var(--km-surface) 18%, var(--km-primary) 58%, var(--km-secondary) 100%);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  color: var(--km-text);
 }
 
 .login-header-toolbar {
@@ -34,5 +35,9 @@ import kindLogo from 'src/assets/Kind-Logo.png';
   width: 192px;
   height: auto;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
+}
+
+.text-on-surface {
+  color: var(--km-text);
 }
 </style>

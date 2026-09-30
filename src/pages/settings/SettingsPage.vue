@@ -50,13 +50,11 @@ import { useI18n } from 'vue-i18n';
 import { useAuth } from '../../composables/useAuthorization';
 import { useUi } from '../../composables/useUi';
 import { skins } from '../../themes/skins';
-import type { SkinId } from '../../types/ui';
 
 const { t, locale } = useI18n();
 const { company } = useAuth();
-const { applySkin, setLanguage } = useUi();
+const { applySkin, setLanguage, skin: selectedSkin } = useUi();
 const language = ref(locale.value);
-const selectedSkin = ref<SkinId>('default');
 const languages = computed(() => [
   { label: 'Español', value: 'es' },
   { label: 'English', value: 'en' },

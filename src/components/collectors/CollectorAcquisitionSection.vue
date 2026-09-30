@@ -670,26 +670,58 @@ function runExtractionTest(): void {
 .data-acquisition-admin {
   display: grid;
   gap: 16px;
+  color: var(--km-text);
+}
+
+:deep(.q-banner) {
+  background: rgba(11, 97, 112, 0.18) !important;
+  border: 1px solid rgba(96, 181, 196, 0.4) !important;
+  color: var(--km-text) !important;
+}
+
+:deep(.q-field__label),
+:deep(.q-field__native),
+:deep(.q-field__control),
+:deep(.q-item__label),
+:deep(.q-item__label--caption),
+:deep(.q-table th),
+:deep(.q-table td),
+:deep(.q-select__menu .q-item) {
+  color: var(--km-text) !important;
+}
+
+:deep(.q-field__native::placeholder) {
+  color: var(--km-muted) !important;
 }
 
 .acquisition-splitter {
   min-height: 760px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--km-border);
   border-radius: 12px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.01);
+}
+
+.acquisition-sidebar,
+.acquisition-detail,
+.empty-panel,
+.info-card,
+.section-block {
+  color: var(--km-text);
 }
 
 .acquisition-sidebar {
   height: 100%;
   padding: 16px;
   background: rgba(255, 255, 255, 0.02);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid var(--km-border);
 }
 
 .acquisition-list {
   border-radius: 10px;
   overflow: hidden;
+  background: rgba(13, 31, 40, 0.9);
+  border-color: var(--km-border);
 }
 
 .acquisition-detail {
@@ -713,13 +745,13 @@ function runExtractionTest(): void {
 
 .info-card {
   padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--km-border);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.02);
 }
 
 .section-block {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--km-border);
   border-radius: 10px;
   padding: 14px;
   background: rgba(255, 255, 255, 0.02);
@@ -731,7 +763,7 @@ function runExtractionTest(): void {
   margin-bottom: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--q-primary);
+  color: var(--km-text);
 }
 </style>
 

@@ -1,6 +1,6 @@
 :root {
-  --km-primary: #0b6170;
-  --km-secondary: #123b49;
+  --km-primary: #164e83;
+  --km-secondary: #19384b;
   --km-background: #061923;
   --km-surface: #0a202b;
   --km-border: #294551;
@@ -54,6 +54,64 @@ body {
   color: var(--km-text);
 }
 
+.q-banner {
+  border-color: var(--km-border) !important;
+}
+
+.text-grey-6,
+.text-grey-7,
+.text-grey-8,
+.text-grey-9,
+.text-grey-10,
+.text-blue-grey-10,
+.q-item__label--caption,
+.q-field__native,
+.q-field__label,
+.q-table__bottom,
+.q-table th,
+.q-table td,
+.muted {
+  color: var(--km-muted) !important;
+}
+
+.text-black,
+.text-dark,
+.q-field__label,
+.q-item__label {
+  color: var(--km-text) !important;
+}
+
+.text-primary {
+  color: var(--km-primary) !important;
+}
+
+.bg-white,
+.bg-grey-1,
+.bg-grey-2,
+.bg-blue-grey-1,
+.bg-surface,
+.bg-dark {
+  background-color: var(--km-surface) !important;
+  color: var(--km-text) !important;
+}
+
+.bg-primary-1 {
+  background: color-mix(in srgb, var(--km-primary) 18%, transparent) !important;
+}
+
+.q-btn--unelevated.bg-primary,
+.q-btn--standard.bg-primary,
+.q-chip.bg-primary,
+.q-badge.bg-primary,
+.q-item.active {
+  background: var(--km-primary) !important;
+  color: #ffffff !important;
+}
+
+.q-btn--flat.text-primary {
+  color: var(--km-primary) !important;
+}
+
 .q-table thead th,
 .q-table tbody td,
 .q-table__bottom {
@@ -74,4 +132,40 @@ body {
 
 .km-primary-bg {
   background: var(--km-primary);
+}
+
+.q-banner.bg-negative,
+.q-banner.bg-warning {
+  color: #ffffff !important;
+}
+
+.q-banner.bg-warning {
+  background: color-mix(in srgb, #f2c14e 60%, var(--km-surface)) !important;
+  color: #111827 !important;
+}
+
+.q-separator {
+  background: var(--km-border);
+}
+
+.q-field--outlined .q-field__control,
+.q-select__menu,
+.q-menu,
+.q-dialog__inner > .q-card,
+.q-table,
+.q-list,
+.q-item,
+.q-card,
+.q-toolbar {
+  border-color: var(--km-border) !important;
+}
+
+@supports not (background: color-mix(in srgb, #fff 50%, #000)) {
+  .bg-primary-1 {
+    background: rgba(22, 78, 131, 0.18) !important;
+  }
+
+  .q-banner.bg-warning {
+    background: rgba(242, 193, 78, 0.25) !important;
+  }
 }
