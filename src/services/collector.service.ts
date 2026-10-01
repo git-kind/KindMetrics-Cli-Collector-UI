@@ -15,8 +15,9 @@ import type {
 } from '../models/collector';
 import { mockCollectorRepository } from '../repositories/mock/mock-collector.repository';
 import type { CollectorRepository } from '../repositories/collector.repository';
+import { extractionMethodService } from './extraction-method.service';
 
-export type CollectorValidationCode = 'nameRequired' | 'codeRequired' | 'invalidEquipment' | 'invalidOriginVersion';
+export type CollectorValidationCode = 'nameRequired' | 'codeRequired' | 'invalidEquipment' | 'invalidOriginVersion' | 'invalidExtractionMethod' | 'invalidSelectedData';
 
 export class CollectorValidationError extends Error {
   constructor(readonly code: CollectorValidationCode) {
@@ -70,6 +71,14 @@ export class CollectorService {
 
   getCollectorLogs(id: string): Promise<CollectorLogMock[] | null> {
     return this.repository.getLogs(this.getCompanyId(), id);
+  }
+
+  executeCollector(id: string): Promise<CollectorTestResultMock | null> {
+    return this.repository.executeCollector(this.getCompanyId(), id);
+  }
+
+  synchronizeCollector(id: string): Promise<boolean> {
+    return this.repository.synchronizeCollector(this.getCompanyId(), id);
   }
 
   executeCollectorTest(id: string, type: CollectorTestType): Promise<CollectorTestResultMock | null> {
@@ -134,12 +143,25 @@ export class CollectorService {
       name: value.name.trim(),
       code: value.code.trim(),
       description: value.description.trim(),
+      extractionMethodIds: [...value.extractionMethodIds],
+      selectedData: [...value.selectedData],
       type: value.type?.trim() || null,
       executionMode: value.executionMode?.trim() || null,
       schedule: value.schedule?.trim() || null,
     };
     if (!normalized.name) throw new CollectorValidationError('nameRequired');
     if (!normalized.code) throw new CollectorValidationError('codeRequired');
+    if (normalized.extractionMethodIds.length === 0) throw new CollectorValidationError('invalidExtractionMethod');
+    if (normalized.selectedData.length === 0) throw new CollectorValidationError('invalidSelectedData');
+
+    const extractionMethods = await extractionMethodService.listMethods();
+    if (normalized.extractionMethodIds.some((id) => !extractionMethods.some((method) => method.id === id))) {
+      throw new CollectorValidationError('invalidExtractionMethod');
+    }
+    const availableData = await extractionMethodService.getAvailableData(normalized.extractionMethodIds);
+    if (normalized.selectedData.some((id) => !availableData.some((item) => item.id === id))) {
+      throw new CollectorValidationError('invalidSelectedData');
+    }
 
     const references = this.repository.getReferenceData();
     return this.validateReferences(normalized, references);

@@ -19,30 +19,39 @@
         </q-item>
       </q-list>
       <q-card-actions align="right">
-        <q-btn color="primary" icon="play_arrow" :label="t('collectors.execution.runNow')" />
+        <q-btn
+          color="primary"
+          icon="play_arrow"
+          :loading="running"
+          :label="t('collectors.execution.runNow')"
+          @click="runNow"
+        />
       </q-card-actions>
     </q-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Collector } from 'src/models/collector';
+import { collectorService } from 'src/services/collector.service';
 
 const props = defineProps<{ collector: Collector }>();
+const emit = defineEmits<{ (event: 'executed'): void }>();
 const { t } = useI18n();
+const running = ref(false);
 
 const execution = computed(() => {
   const config = (props.collector.configuration ?? {}) as Record<string, unknown>;
   return {
-    mode: (config.executionMode as string | undefined) ?? 'Scheduled',
-    schedule: (config.schedule as string | undefined) ?? 'Every 5 minutes',
-    lastExecutionAt: props.collector.lastExecutionAt ?? '2026-09-29T09:20:00.000Z',
-    nextExecutionAt: props.collector.nextExecutionAt ?? '2026-09-29T09:25:00.000Z',
-    result: (props.collector.lastExecutionStatus as string | undefined) ?? 'SUCCESS',
-    recordsObtained: 1250,
-    recordsStored: 1250,
+    mode: props.collector.executionMode ?? 'Scheduled',
+    schedule: props.collector.schedule ?? 'Every 5 minutes',
+    lastExecutionAt: props.collector.lastExecutionAt ?? t('common.notAvailable'),
+    nextExecutionAt: props.collector.nextExecutionAt ?? t('common.notAvailable'),
+    result: props.collector.lastExecutionStatus ?? 'SUCCESS',
+    recordsObtained: Number(config.recordsObtained ?? 125),
+    recordsStored: Number(config.recordsStored ?? 125),
   };
 });
 
@@ -55,4 +64,14 @@ const items = computed(() => [
   { label: t('collectors.execution.recordsObtained'), value: String(execution.value.recordsObtained) },
   { label: t('collectors.execution.recordsStored'), value: String(execution.value.recordsStored) },
 ]);
+
+async function runNow(): Promise<void> {
+  running.value = true;
+  try {
+    await collectorService.executeCollector(props.collector.id);
+    emit('executed');
+  } finally {
+    running.value = false;
+  }
+}
 </script>

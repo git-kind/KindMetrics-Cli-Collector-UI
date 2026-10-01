@@ -11,6 +11,18 @@
           <q-item-label>{{ item.value }}</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item>
+        <q-item-section>
+          <q-item-label caption>{{ t('collectors.extraction.methods') }}</q-item-label>
+          <q-item-label>{{ extractionMethodNames.join(', ') || t('common.notAvailable') }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section>
+          <q-item-label caption>{{ t('collectors.extraction.selectedData') }}</q-item-label>
+          <q-item-label>{{ selectedDataNames.join(', ') || t('common.notAvailable') }}</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-list>
   </q-card>
 </template>
@@ -19,9 +31,22 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Collector } from 'src/models/collector';
+import type { ExtractionMethod } from 'src/models/extraction-method';
 
-const props = defineProps<{ collector: Collector; equipmentName?: string | null }>();
+const props = defineProps<{
+  collector: Collector;
+  equipmentName?: string | null;
+  extractionMethods?: ExtractionMethod[];
+}>();
 const { t } = useI18n();
+const extractionMethodNames = computed(() => (props.extractionMethods ?? [])
+  .filter((method) => props.collector.extractionMethodIds.includes(method.id))
+  .map((method) => `${t(`extractionMethods.types.${method.type}`)} - ${method.name}`));
+const selectedDataNames = computed(() => (props.extractionMethods ?? [])
+  .filter((method) => props.collector.extractionMethodIds.includes(method.id))
+  .flatMap((method) => method.availableData)
+  .filter((item) => props.collector.selectedData.includes(item.id))
+  .map((item) => item.name));
 
 const items = computed(() => [
   { label: t('collectors.fields.code'), value: props.collector.code },

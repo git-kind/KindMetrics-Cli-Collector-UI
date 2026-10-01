@@ -360,11 +360,11 @@ const defaultItems: CollectorAcquisitionDataItem[] = [
     name: 'Usuarios',
     description: 'Identidad de usuarios del entorno.',
     status: 'INACTIVE',
-    methodType: 'MICROSOFT_TEAMS',
-    methodName: 'Microsoft Teams',
+    methodType: 'MICROSOFT_GRAPH',
+    methodName: 'Microsoft Graph - Patito',
     connection: {
-      name: 'Microsoft Teams',
-      type: 'MICROSOFT_TEAMS',
+      name: 'Microsoft Graph - Patito',
+      type: 'MICROSOFT_GRAPH',
       status: 'WARN',
       webhookUrl: 'https://graph.microsoft.com',
       tenantId: 'tenant-01',
@@ -372,8 +372,8 @@ const defaultItems: CollectorAcquisitionDataItem[] = [
       channel: 'general',
     },
     extraction: {
-      name: 'Microsoft Teams payload',
-      method: 'MICROSOFT_TEAMS',
+      name: 'Microsoft Graph payload',
+      method: 'MICROSOFT_GRAPH',
       endpoint: '/v1.0/chats',
       responseFormat: 'JSON',
       selector: '$.value[*]',
@@ -395,7 +395,7 @@ const methodOptions = [
   { label: 'API', value: 'API' },
   { label: 'SNMP', value: 'SNMP' },
   { label: 'Webhook', value: 'WEBHOOK' },
-  { label: 'Microsoft Teams', value: 'MICROSOFT_TEAMS' },
+  { label: 'Microsoft Graph', value: 'MICROSOFT_GRAPH' },
 ] as const;
 
 const statusOptions = [
@@ -441,7 +441,7 @@ function buildMethodName(type: AcquisitionMethodType): string {
     API: 'API - CDR',
     SNMP: 'SNMP - Equipo',
     WEBHOOK: 'Webhook - Eventos',
-    MICROSOFT_TEAMS: 'Microsoft Teams',
+    MICROSOFT_GRAPH: 'Microsoft Graph',
   };
   return names[type] ?? type;
 }
@@ -475,7 +475,7 @@ function getExtractionEmpty(type: AcquisitionMethodType): CollectorExtractionCon
   if (type === 'WEBHOOK') {
     return { name: 'Webhook extraction', method: 'POST', httpMethod: 'POST', endpoint: '/webhook', responseFormat: 'JSON', selector: '$.data[*]' };
   }
-  return { name: 'Microsoft Teams extraction', method: 'MICROSOFT_TEAMS', endpoint: '/v1.0/messages', responseFormat: 'JSON', selector: '$.value[*]' };
+  return { name: 'Microsoft Graph extraction', method: 'MICROSOFT_GRAPH', endpoint: '/v1.0/messages', responseFormat: 'JSON', selector: '$.value[*]' };
 }
 
 function loadItems(): void {

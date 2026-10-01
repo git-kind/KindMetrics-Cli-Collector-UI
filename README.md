@@ -1,542 +1,963 @@
-KindMetrics-Cli-Collector-UI
+# KindMetrics-Cli-Collector-UI
 
-1. Propósito
+## Propósito
 
-KindMetrics-Cli-Collector-UI es la interfaz de administración del Collector de KindMetrics.
+`KindMetrics-Cli-Collector-UI` es la interfaz de administración y configuración del Collector de KindMetrics.
 
-Su responsabilidad principal es permitir configurar y administrar la adquisición de información desde equipos y sistemas de telefonía hacia el almacenamiento utilizado por KindMetrics.
+Administra la instalación local, Company, conexión, equipos/devices, discovery, métodos de extracción, Collectors, selección de datos, mappings, almacenamiento, ejecución, sincronización, logs y pruebas.
 
-La UI no ejecuta directamente procesos de adquisición, protocolos, consultas a equipos ni conexiones directas a MySQL. Esas responsabilidades pertenecen al KindMetrics-Cli-Collector-API y a sus procesos de ejecución.
+La UI configura y administra. La ejecución real corresponde a `KindMetrics-Cli-Collector-API` y `KindMetrics-Cli-BS`.
 
-2. Stack obligatorio
+La UI nunca debe conectarse directamente a MySQL ni ejecutar directamente protocolos de adquisición.
 
-Vue 3
+## Arquitectura de adquisición
 
-Quasar
-
-Composition API
-
-TypeScript
-
-<script setup>
-
-Vue Router
-
-Vue I18n
-
-Axios cuando exista integración con API
-
-ESLint
-
-Prettier
-
-No utilizar Pinia.
-
-No agregar dependencias nuevas sin justificación técnica.
-
-3. Arquitectura
-
-Mantener:
-
-Page
-  ↓
-Component
-  ↓
-Service
-  ↓
-Repository
-  ↓
-MockRepository / API Repository
-
-Las Pages deben encargarse principalmente de composición, navegación y contexto.
-
-La lógica de negocio no debe concentrarse en Pages ni templates.
-
-4. Cadena de adquisición
-
-Equipment
-   ↓
-Origin
-   ↓
-ExtractionMethod
-   ↓
+```text
+Equipo / Sistema
+      ↓
+Método de Extracción
+      ↓
+Discovery / Datos disponibles
+      ↓
 Collector
-   ↓
-Mapping / Transformation
-   ↓
-Storage
+      ↓
+Mapeo / Transformación
+      ↓
+Almacenamiento
+      ↓
+KindMetrics
+```
 
-La UI configura estos elementos, pero no ejecuta directamente drivers, protocolos, SNMP, APIs de equipos ni procesos de adquisición.
+## Método de Extracción vs Collector
 
-5. Identidad de Company y archivo de configuración
+### Método de Extracción
 
-La Company se crea desde KindMetrics-UI.
+Representa una conexión concreta hacia un sistema, dispositivo o servicio.
 
-Cada Company posee un GUID único:
+Define:
 
-Company.id
+- Tipo de extracción.
+- Conexión.
+- Credenciales.
+- Discovery.
+- Target.
+- Datos disponibles.
+- Capacidades.
 
-Ese GUID será utilizado como nombre del archivo de configuración del Collector:
+Ejemplos:
 
-{CompanyId}.cfg
+```text
+SNMP - Cisco C9300-01
+SNMP - AudioCodes 2345
+API - Voca 2223
+Microsoft Graph - Patito
+Webhook - Sistema CDR
+```
 
-Ejemplo:
+Microsoft Teams no es un protocolo. El mecanismo técnico es Microsoft Graph. La UI puede mostrar `TEAMS - Patito`, pero internamente el tipo debe ser `MICROSOFT_GRAPH`.
 
-7f8c2a91-4f12-4a6d-b123-9c1e8d7f1234.cfg
+### Collector
 
-Por ahora:
+Representa la configuración de un proceso de adquisición.
 
-No existe InstallationId.
+Define:
 
-No se contemplan múltiples instalaciones de una misma Company.
+- Qué Métodos de Extracción utilizar.
+- Qué datos obtener.
+- Qué datos seleccionar.
+- Cómo transformar los datos.
+- A qué estructura almacenarlos.
+- Cuándo obtenerlos.
+- Cómo ejecutarlos.
+- Qué registrar en logs.
+- Cuándo sincronizarlos, si aplica.
 
-No se agrega una entidad Installation.
+> Un Collector es la configuración de un proceso de adquisición que utiliza uno o varios Métodos de Extracción, selecciona los datos requeridos, los transforma cuando sea necesario, los asigna a una estructura de almacenamiento y ejecuta el proceso bajo una determinada programación.
 
-La instalación queda asociada a la Company mediante CompanyId.
+## Frecuencia de adquisición
 
-Estas posibilidades quedan fuera del alcance actual.
+La frecuencia de obtención de datos pertenece al **Collector**, dentro de `Ejecución`.
 
-6. Primera ejecución
+No pertenece al Método de Extracción.
 
-El flujo conceptual es:
+Un mismo Método puede ser reutilizado:
 
+```text
+SNMP - Cisco C9300-01
+        │
+        ├── Collector A → cada 1 minuto
+        ├── Collector B → cada 5 minutos
+        └── Collector C → cada 1 hora
+```
+
+El Método define cómo y desde dónde obtener datos. El Collector define qué datos obtener y cuándo obtenerlos.
+
+Para métodos orientados a eventos puede no existir polling; pueden utilizar `EVENT_DRIVEN`.
+
+La frecuencia de adquisición y la de sincronización son independientes.
+
+## Instalación
+
+`kindCli.cfg` pertenece al runtime/API del Collector.
+
+Primer inicio:
+
+```text
 Inicio
-  ↓
-Buscar configuración {CompanyId}.cfg
-  ↓
-¿Existe?
-  │
-  ├── NO
-  │    ↓
-  │  Configuración inicial
-  │    ↓
-  │  Solicitar/validar CompanyId
-  │    ↓
-  │  Configurar empresa
-  │    ↓
-  │  Configurar conexión a Base de Datos
-  │    ↓
-  │  Probar conexión
-  │    ↓
-  │  Guardar {CompanyId}.cfg
-  │    ↓
-  │  Login
-  │
-  └── SÍ
-       ↓
-     Cargar configuración
-       ↓
-     Login
-       ↓
-     Dashboard
-
-La UI no debe acceder directamente al sistema de archivos.
-
-La existencia, lectura y escritura del .cfg pertenecen al runtime/API del Collector.
-
-7. Configuración inicial
-
-El wizard debe permitir configurar como mínimo:
-
-Company
-
-CompanyId
-
-Código
-
-Nombre
-
-El CompanyId debe corresponder al GUID generado previamente desde KindMetrics-UI.
-
-La UI no debe generar arbitrariamente una nueva Company desde este flujo.
-
+ ↓
+No existe kindCli.cfg
+ ↓
+Instalación inicial
+ ↓
+Empresa
+ ↓
 Base de datos
-
-Debe contemplar los datos necesarios para la conexión a la base de datos de monitoreo:
-
-Host
-Port
-Database
-Username
-Password
-SSL / opciones de conexión
-
-Los campos definitivos deben respetar el contrato real del Collector API.
-
-Prueba de conexión
-
-Debe existir una acción para probar la conexión antes de completar la instalación.
-
-Datos de conexión
-       ↓
+ ↓
 Probar conexión
-       ↓
-Resultado
-       ├── Éxito
-       └── Error
-
-No debe marcarse la instalación como configurada si la validación requerida falla.
-
-8. Archivo de configuración
-
-El archivo .cfg pertenece al entorno del Collector, no al navegador.
-
-La UI nunca debe:
-
-leer directamente archivos del sistema operativo;
-
-escribir directamente el .cfg;
-
-conectarse directamente a MySQL;
-
-almacenar credenciales de base de datos en localStorage/sessionStorage.
-
-La comunicación será conceptualmente:
-
-KindMetrics-Cli-Collector-UI
-          │
-          │ HTTP
-          ▼
-KindMetrics-Cli-Collector-API
-          │
-          ├── InstallationService
-          ├── ConfigurationService
-          └── AuthenticationService
-                     │
-                     ▼
-               {CompanyId}.cfg
-
-El API/runtime es responsable de persistir la configuración y proteger las credenciales.
-
-9. Estado de instalación
-
-La UI debe manejar conceptualmente:
-
-NOT_CONFIGURED
-CONFIGURING
-CONFIGURED
-ERROR
-
-Mientras no exista API real, estos estados pueden simularse mediante Mock.
-
-Arquitectura:
-
-InstallationRepository
-        ↓
-MockInstallationRepository
-        ↓
-InstallationService
-        ↓
-Pages / Components
+ ↓
+Guardar configuración
+ ↓
+Login
+```
 
 Posteriormente:
 
-InstallationRepository
-        ↓
-ApiInstallationRepository
-        ↓
-KindMetrics-Cli-Collector-API
-
-Pages y Components no deben requerir una reescritura para cambiar Mock por API.
-
-10. Login
-
-Instalación y autenticación son responsabilidades diferentes.
-
-La configuración responde:
-
-¿Está configurada esta instalación?
-
-El login responde:
-
-¿Puede este usuario acceder al sistema?
-
-Por lo tanto:
-
-Configuración
-      ↓
-Company / conexión
-      ↓
+```text
+Inicio
+ ↓
+Existe kindCli.cfg
+ ↓
+Cargar configuración
+ ↓
+Validar conexión
+ ↓
 Login
+ ↓
+Dashboard
+```
+
+La UI consulta al API el estado de instalación.
+
+## Company
+
+Una instalación Customer pertenece a una única Company.
+
+```text
+Company
+   │
+   └── CompanyId (GUID)
+          │
+          └── configuración de instalación
+```
+
+En una instalación administrada por KIND puede existir un selector de Company después del login.
+
+Cada Company puede tener su propia base de datos:
+
+```text
+KindMetrics_PatitoFeo
+KindMetrics_Rufus
+KindMetrics_Saxofon
+```
+
+Las Company DB usan el mismo esquema funcional, pero los datos están aislados.
+
+La selección física de DB corresponde al backend. La UI nunca debe manipular directamente la conexión.
+
+## Equipment / Devices
+
+LibreNMS utiliza el concepto `Devices`, y KindMetrics debe conservar esta distinción cuando exista un dispositivo.
+
+Ejemplo:
+
+```text
+Device:
+Cisco C9300-01
+
+IP:
+10.20.30.40
+
+Vendor:
+Cisco
+
+Model:
+C9300-24T
+
+OS:
+IOS-XE
+
+Version:
+17.x
+
+Discovery:
+Completed
+```
+
+No todos los métodos tienen un Device. Un target puede ser:
+
+- Device.
+- API Service.
+- Microsoft Graph Tenant/Service.
+- WebHook Source.
+- Otro target específico.
+
+## Discovery
+
+Flujo:
+
+```text
+Datos de conexión
+        ↓
+Connectivity Test
+        ↓
+Device Discovery
+        ↓
+Identification
+        ↓
+Equipment Definition
+        ↓
+Capabilities
+        ↓
+Available Data
+        ↓
+Obtención de Datos
+        ↓
+Mapping
+        ↓
+Storage
+        ↓
+Collector
+```
+
+Para SNMP, la identificación inicial puede utilizar `sysObjectID` y `sysDescr`.
+
+Posteriormente pueden determinarse fabricante, familia, modelo, OS, versión, capacidades, OIDs, sensores, interfaces y métricas disponibles.
+
+LibreNMS es referencia funcional, no dependencia.
+
+## Definiciones globales
+
+Pueden existir definiciones reutilizables de:
+
+```text
+Equipment Definitions
+Discovery Definitions
+OID Definitions
+Extraction Definitions
+Vendor Definitions
+Model Definitions
+Protocol Definitions
+```
+
+Ejemplo:
+
+```text
+Cisco IOS-XE
+  ├── sysObjectID
+  ├── sysDescr
+  ├── OIDs
+  ├── Sensors
+  ├── Interfaces
+  └── Available Metrics
+```
+
+La ubicación física definitiva de estas definiciones entre almacenamiento global y Company DB continúa siendo una decisión de arquitectura independiente.
+
+## Métodos de Extracción
+
+Tipos iniciales:
+
+```text
+SNMP
+API
+MICROSOFT_GRAPH
+WEBHOOK
+```
+
+### SNMP
+
+Puede configurar host/IP, puerto, versión, credenciales, discovery, datos disponibles, OIDs y capacidades.
+
+### API
+
+Configura la conexión necesaria para el servicio correspondiente.
+
+### Microsoft Graph
+
+Puede requerir:
+
+- Tenant ID.
+- Client ID.
+- Client Secret o certificado.
+- OAuth 2.0 / Entra ID.
+- Scopes/permisos.
+
+Discovery puede exponer Teams, Channels, Users, Members y Messages según los permisos.
+
+### WebHook
+
+Está orientado a recepción de eventos y puede trabajar en modo `EVENT_DRIVEN`.
+
+## Datos disponibles
+
+Un Método de Extracción puede exponer datos utilizables por Collectors:
+
+```text
+NumeroLlamadas
+NumeroLlamadasPerdidas
+DuracionPromedio
+CallingNumber
+CalledNumber
+StartTime
+```
+
+El Collector selecciona cuáles necesita obtener.
+
+## Collector
+
+Estructura conceptual:
+
+```text
+Collector
+│
+├── Generales
+├── Estructura de Datos
+│   ├── Tablas
+│   └── Campos
+├── Métodos de Extracción
+│   ├── Conexión
+│   └── Datos disponibles
+├── Asignación de Datos / Mapeo
+│   ├── Origen
+│   ├── Transformación
+│   └── Destino
+├── Ejecución
+│   ├── Modo
+│   ├── Frecuencia
+│   └── Estado de ejecución
+├── Logs
+└── Sincronización
+    └── Opcional
+```
+
+Agrupación recomendada:
+
+```text
+CONFIGURACIÓN
+- Generales
+- Estructura de Datos
+- Métodos de Extracción
+- Asignación de Datos
+
+OPERACIÓN
+- Ejecución
+- Logs
+- Sincronización
+```
+
+No debe existir una pestaña global `Health`. Las pruebas deben pertenecer a la operación que se está validando.
+
+## Estructura de Datos
+
+Debe comportarse como una pantalla de administración de base de datos, conceptualmente similar a MySQL Workbench, phpMyAdmin o DBeaver.
+
+Debe permitir:
+
+- Listar y buscar tablas.
+- Crear, editar y eliminar tablas.
+- Seleccionar una tabla.
+- Crear, editar y eliminar columnas.
+- Administrar índices.
+
+Diseño:
+
+```text
+┌───────────────────────┬──────────────────────────────────────┐
+│ ESTRUCTURA            │ DETALLE DE TABLA                    │
+│                       │                                      │
+│ Base de datos         │ calls                                │
+│                       │ [Estructura] [Índices]              │
+│ 📁 Tablas             │                                      │
+│   ├─ calls            │ id BIGINT PK                         │
+│   ├─ call_events      │ calling_number VARCHAR(50)           │
+│   └─ statistics       │ ...                                  │
+│                       │ [+ Nueva columna]                    │
+│ [+ Nueva tabla]       │                                      │
+└───────────────────────┴──────────────────────────────────────┘
+```
+
+Modelos conceptuales:
+
+```text
+DatabaseStructure
+└── tables[]
+
+DatabaseTable
+├── id
+├── name
+├── description
+├── columns[]
+└── indexes[]
+
+DatabaseColumn
+├── id
+├── name
+├── dataType
+├── length
+├── nullable
+├── primaryKey
+├── autoIncrement
+├── defaultValue
+└── comment
+
+DatabaseIndex
+├── id
+├── name
+├── type
+└── columns[]
+```
+
+Tipos iniciales:
+
+```text
+BIGINT
+INT
+DECIMAL
+VARCHAR
+TEXT
+BOOLEAN
+DATE
+DATETIME
+TIMESTAMP
+JSON
+```
+
+No debe existir editor SQL libre.
+
+La UI define la estructura deseada. El API aplicará posteriormente los cambios físicos en MySQL.
+
+## Mapping
+
+El Mapping representa:
+
+```text
+DATO OBTENIDO
       ↓
-Usuario autenticado
+ORIGEN
+      ↓
+TRANSFORMACIÓN
+      ↓
+DESTINO
+```
 
-La existencia de {CompanyId}.cfg no sustituye la autenticación.
+Ejemplo:
 
-11. Escenario Cloud
+```text
+Dato:
+NumeroLlamadas
 
-En Cloud:
+Origen:
+Método: API - CDR
+Dato origen: totalCalls
 
-Login
-  ↓
-KindMetrics-API
-  ↓
-Usuario autenticado
-  ↓
-UserCompanyAccess
-  ↓
-Empresas disponibles
-  ↓
-Seleccionar Company
-  ↓
-Contexto Company
-  ↓
+Transformación:
+NONE
+
+Destino:
+Tabla: calls
+Campo: total_calls
+```
+
+Debe tener CRUD completo:
+
+- Crear.
+- Consultar.
+- Editar.
+- Eliminar.
+
+Debe existir:
+
+```text
+[+ Nueva asignación]
+```
+
+Modelo conceptual:
+
+```text
+DataMapping
+├── id
+├── collectorId
+├── dataId
+├── acquisitionMethodId
+├── sourceField
+├── transformation
+├── transformationConfig
+├── destinationTable
+├── destinationField
+├── status
+├── createdAt
+└── updatedAt
+```
+
+Referencias cuando existan entidades correspondientes:
+
+```text
+dataId → CollectorData
+acquisitionMethodId → ExtractionMethod
+destinationTableId → DatabaseTable
+destinationFieldId → DatabaseColumn
+```
+
+El Método y Dato Origen deben depender del dato seleccionado.
+
+El Campo Destino debe depender de la tabla seleccionada.
+
+No se debe permitir duplicar exactamente el mismo origen y destino dentro del Collector.
+
+## Transformaciones
+
+Catálogo inicial:
+
+```text
+NONE
+CONVERT_TYPE
+MULTIPLY
+DIVIDE
+ADD
+SUBTRACT
+EXTRACT
+MAP_VALUE
+```
+
+Las transformaciones configurables deben mostrar sólo los parámetros necesarios.
+
+No implementar inicialmente un editor de expresiones complejo.
+
+## Prueba de Mapping
+
+Ejemplo:
+
+```text
+Dato origen: totalCalls
+Valor: 1250
+Transformación: NONE
+Resultado: 1250
+Destino: calls.total_calls
+
+✓ Asignación válida
+```
+
+Eliminar un Mapping nunca debe eliminar el Método, dato origen, tabla, campo destino ni datos físicos existentes.
+
+## Ejecución
+
+Define cómo y cuándo trabaja el Collector.
+
+Puede incluir:
+
+- Modo.
+- Frecuencia.
+- Programación.
+- Estado.
+- Última ejecución.
+- Próxima ejecución.
+- Resultado.
+- Prueba.
+
+Ejemplo:
+
+```text
+Modo:
+POLLING
+
+Frecuencia:
+Cada 5 minutos
+```
+
+Para eventos:
+
+```text
+Modo:
+EVENT_DRIVEN
+```
+
+La UI configura. El scheduler real corresponde a `KindMetrics-Cli-BS`.
+
+## Logs
+
+Debe permitir consultar:
+
+- Fecha/hora.
+- Nivel.
+- Ejecución.
+- Operación.
+- Mensaje.
+- Resultado.
+- Error.
+
+La generación y persistencia real corresponde al API/BS.
+
+## Sincronización
+
+Es independiente de la adquisición.
+
+Ejemplo:
+
+```text
+Adquisición:
+Cada 1 minuto
+
+Sincronización:
+Cada 15 minutos
+```
+
+Puede incluir:
+
+- Habilitación.
+- Frecuencia.
+- Última sincronización.
+- Próxima sincronización.
+- Datos pendientes.
+- Último resultado.
+- Prueba.
+
+La sincronización real corresponde al backend/BackgroundService.
+
+## Almacenamiento
+
+Nombres preferidos:
+
+```text
+Almacenamiento Servidor
+Local Temporal
+```
+
+Debe evitarse usar únicamente `Local`, porque la UI puede ejecutarse en KIND mientras el almacenamiento temporal pertenece al Collector del cliente.
+
+## Arquitectura Frontend
+
+Stack obligatorio:
+
+- Vue 3.
+- Quasar.
+- Composition API.
+- TypeScript.
+- `<script setup>`.
+- Vue Router.
+- Vue I18n.
+- ESLint.
+- Prettier.
+
+No utilizar Pinia.
+
+No agregar dependencias sin justificación.
+
+### Pages
+
+Composición, layout, navegación y contexto.
+
+No deben contener lógica de negocio compleja.
+
+### Components
+
+Contienen la experiencia principal de usuario y pueden utilizar Services.
+
+### Services
+
+Representan operaciones de negocio concretas y deben ser cortos y específicos.
+
+### Repositories
+
+Abstraen el origen de datos.
+
+```text
+MockRepository
+      ↓
+Service
+      ↓
+Component
+```
+
+Posteriormente:
+
+```text
+API Repository
+      ↓
+Service
+      ↓
+Component
+```
+
+La sustitución de Mock por API no debe obligar a reescribir Pages o Components.
+
+## Mock
+
+Debe simular:
+
+- Companies.
+- Equipment/Devices.
+- Extraction Methods.
+- Discovery.
+- Available Data.
+- Collectors.
+- Database Structures.
+- Mappings.
+- Storage.
+- Execution.
+- Logs.
+- Synchronization.
+
+Los contratos Mock deben diseñarse compatibles con el futuro API.
+
+## Internacionalización
+
+Toda cadena visible debe usar Vue I18n.
+
+El cambio de idioma debe ser dinámico, sin recargar ni perder sesión, Company activa o estado de edición.
+
+Los datos de negocio no deben traducirse automáticamente:
+
+```text
+Company names
+Equipment names
+Collector names
+Metric names
+Database names
+Dashboard names
+```
+
+## Lo que la UI NO debe hacer
+
+No debe:
+
+- Conectarse directamente a MySQL.
+- Ejecutar SQL directamente.
+- Ejecutar SNMP directamente.
+- Ejecutar APIs de adquisición directamente.
+- Ejecutar Microsoft Graph directamente.
+- Ejecutar WebHooks directamente.
+- Implementar scheduler.
+- Implementar BackgroundService.
+- Ejecutar sincronizaciones reales.
+- Implementar retry de infraestructura.
+- Implementar motor de adquisición.
+- Implementar drivers.
+- Implementar protocolos.
+- Decidir físicamente qué Company DB utilizar.
+
+Estas responsabilidades pertenecen al API, Collector runtime y/o BackgroundService.
+
+## Menú principal
+
+```text
 Dashboard
-
-La autoridad de seguridad corresponde al KindMetrics-API.
-
-El navegador nunca debe asumir que puede acceder a una Company simplemente porque conoce su GUID.
-
-12. Multiempresa
-
-Company es el tenant de KindMetrics.
-
-Company.id es un GUID.
-
-No se utilizará un prefijo de tablas como mecanismo principal de multi-tenancy.
-
-La seguridad multi-tenant pertenece al API.
-
-La UI no debe implementar reglas de autorización como autoridad final.
-
-13. Navegación
-
-Después del login debe existir un menú persistente:
-
-Dashboard
-
-Adquisición
-  ├── Equipos
-  ├── Orígenes
-  ├── Métodos de extracción
-  ├── Collectors
-  └── Mappings
-
+Equipos
+Métodos de Extracción
+Collectors
+Mappings
 Almacenamiento
-
 Configuración
-  ├── Empresa
-  ├── Base de datos
-  └── General
+```
 
-Durante una instalación no configurada, el usuario debe ser dirigido al flujo de instalación.
+No es necesario un contenedor superior `Adquisición`.
 
-Después de completar la instalación:
+## Rutas
 
-Installation → Login → Dashboard
-
-La instalación no debe ser un módulo permanente del menú cuando ya está configurada, salvo que posteriormente se defina una necesidad administrativa.
-
-14. Rutas conceptuales
-
+```text
 /login
-/installation
 /dashboard
 /equipment
-/origins
 /extraction-methods
 /collectors
 /mappings
 /storage
 /settings
-
-La estructura exacta puede adaptarse a la implementación actual.
-
-15. Protección de rutas
-
-Conceptualmente:
-
-                    Inicio
-                      │
-                      ▼
-              Installation Status
-                      │
-            ┌─────────┴─────────┐
-            │                   │
-      NOT_CONFIGURED         CONFIGURED
-            │                   │
-            ▼                   ▼
-     Installation            Login
-                                  │
-                                  ▼
-                              Dashboard
-
-Si el estado es NOT_CONFIGURED, las rutas protegidas deben redirigir a /installation.
-
-Si está configurado, debe continuar el flujo normal de Login.
-
-La protección definitiva debe coordinarse con el API.
-
-16. Mock
-
-Mientras el Collector API no esté integrado, utilizar Mock Repositories.
-
-Debe poder simular:
-
-instalación no configurada;
-
-CompanyId;
-
-datos de empresa;
-
-configuración de base de datos;
-
-prueba de conexión;
-
-instalación configurada;
-
-login;
-
-Company actual;
-
-navegación.
-
-No simular conexiones reales a MySQL desde el navegador.
-
-17. Branding y Skins
-
-Mantener:
-
-Logo KIND Technologies
-
-Branding de Company
-
-Nombre de Company
-
-Idioma
-
-Skin
-
-Skin Default:
-
-Azul petróleo oscuro
-
-No modificar la arquitectura funcional al cambiar de skin.
-
-18. Internacionalización
-
-Toda cadena visible debe utilizar Vue I18n:
-
-títulos;
-
-menús;
-
-botones;
-
-labels;
-
-placeholders;
-
-mensajes de validación;
-
-errores;
-
-éxito;
-
-instalación;
-
-configuración;
-
-login;
-
-navegación.
-
-El idioma debe cambiar en runtime sin reload ni pérdida de estado.
-
-Los datos de negocio no se traducen automáticamente:
-
-Company.name
-Company.code
-Equipment.name
-Origin.name
-Collector.name
-Metric.name
-
-19. Seguridad
-
-La UI no es autoridad de seguridad.
-
-La seguridad real corresponde a:
-
-KindMetrics-Cli-Collector-API
-
-y cuando corresponda:
-
-KindMetrics-API
-
-No almacenar credenciales reales innecesariamente en localStorage/sessionStorage.
-
-20. Referencias
-
-KindMetrics utiliza como referencias:
-
-Grafana
-
-Apache Superset
-
-Se consideran referencias para navegación, dashboards, consultas, visualización y UX.
-
-No copiar su arquitectura interna.
-
-El Collector tiene una responsabilidad específica de adquisición de datos de telefonía y voz.
-
-21. Fuera del alcance actual
-
-No implementar:
-
-InstallationId;
-
-múltiples instalaciones de una Company;
-
-prefijos de tablas como mecanismo de multi-tenancy;
-
-drivers reales de equipos dentro de Vue;
-
-ejecución directa de SNMP/API/protocolos desde Vue;
-
-conexión directa de Vue a MySQL;
-
-permisos finales del Collector que todavía no estén definidos;
-
-contratos de API no aprobados;
-
-entidades de dominio que todavía no tengan definición aprobada.
-
-22. Principio general
-
-KindMetrics-UI
-    Administración global
-    Companies
-    Usuarios
-    Dashboards
-    Configuración global
-          │
-          ▼
-KindMetrics-API
-    Seguridad
-    Multi-tenant
-    Empresas
-    Usuarios
-    Permisos
-          │
-
-KindMetrics-Cli-Collector-UI
-    Configuración y administración del Collector
-          │
-          ▼
-KindMetrics-Cli-Collector-API
-    Configuración local
-    Archivo {CompanyId}.cfg
-    Conexiones
-    Ejecución de adquisición
-          │
-          ▼
-Collector / BackgroundService
-    Adquisición
-    Normalización
-    Persistencia
-          │
-          ▼
-Monitoring Database
-
-La UI debe permanecer desacoplada de los detalles físicos de ejecución y almacenamiento.
+```
+
+Después del login:
+
+```text
+/login
+   ↓
+/dashboard
+```
+
+En instalaciones KIND puede existir selección de Company.
+
+En Customer, la Company ya está determinada por la instalación.
+
+## Referencias funcionales
+
+### Grafana
+
+Referencia para dashboards, datasources, query experience, visualizaciones, usuarios y permisos.
+
+### Apache Superset
+
+Referencia para datasets, SQL/Exploration, charts, dashboards, filtros y análisis.
+
+### LibreNMS
+
+Referencia especialmente para Devices, SNMP, Discovery, identificación, OIDs, definiciones, capacidades, sensores e interfaces.
+
+Son referencias funcionales y de UX, no dependencias.
+
+## Flujo completo
+
+```text
+CONFIGURAR
+    ↓
+VALIDAR
+    ↓
+PROBAR
+    ↓
+ACTIVAR
+    ↓
+EJECUTAR
+    ↓
+REGISTRAR
+    ↓
+SINCRONIZAR
+```
+
+Detalle:
+
+```text
+Company
+  ↓
+Equipment / Target
+  ↓
+Extraction Method
+  ↓
+Discovery
+  ↓
+Available Data
+  ↓
+Collector
+  ↓
+Data Selection
+  ↓
+Mapping
+  ↓
+Storage
+  ↓
+Execution
+  ↓
+Logs
+  ↓
+Synchronization
+```
+
+## Regla fundamental
+
+```text
+Extraction Method
+    =
+cómo y desde dónde obtener datos
+
+Collector
+    =
+qué datos obtener
++ cómo procesarlos
++ dónde almacenarlos
++ cuándo obtenerlos
++ cuándo sincronizarlos
+```
+
+Por lo tanto:
+
+- Conexión → Método de Extracción.
+- Discovery → Método de Extracción.
+- Datos disponibles → Método de Extracción.
+- Selección de datos → Collector.
+- Mapping → Collector.
+- Frecuencia de adquisición → Collector.
+- Ejecución → Collector.
+- Logs → Collector.
+- Sincronización → Collector.
+
+## Reglas de modificación
+
+Antes de modificar el proyecto:
+
+1. Revisar el código existente.
+2. Revisar la documentación global.
+3. Respetar decisiones aprobadas.
+4. No reemplazar archivos completos innecesariamente.
+5. No realizar refactors no solicitados.
+6. Mantener Page, Component, Service y Repository separados.
+7. Mantener Mock compatible con API.
+8. Mantener i18n.
+9. Mantener ESLint y Prettier.
+10. Evitar nuevas dependencias sin justificación.
+
+Cuando se solicite una modificación, cambiar únicamente lo necesario.
+
+## Documentación global
+
+La documentación global está en:
+
+```text
+../docs/
+```
+
+Es la fuente de verdad global.
+
+Cuando se modifique documentación:
+
+- Partir de la versión existente.
+- Aplicar sólo modificaciones aprobadas.
+- No regenerar toda la documentación perdiendo contenido anterior.
+- Mantener coherencia entre proyectos.
+
+Este `README.md` documenta específicamente `KindMetrics-Cli-Collector-UI`.
+
+## Estado conceptual actual
+
+```text
+✓ Company como contexto de instalación
+✓ Una instalación Customer pertenece a una Company
+✓ Company DB independiente por empresa
+✓ Equipment / Device
+✓ Discovery
+✓ Extraction Method como conexión concreta
+✓ Microsoft Graph como mecanismo técnico para Teams
+✓ Collector como proceso de adquisición
+✓ Un Method puede reutilizarse por varios Collectors
+✓ Un Collector puede utilizar varios Methods
+✓ Frecuencia de adquisición en Collector
+✓ Mapping dentro de Collector
+✓ CRUD de Mapping
+✓ Estructura de Datos como administración de DB
+✓ CRUD de tablas
+✓ CRUD de columnas
+✓ CRUD de índices
+✓ Ejecución en Collector
+✓ Logs en Collector
+✓ Sincronización independiente
+✓ Mock Repository
+✓ API como autoridad
+✓ UI sin acceso directo a MySQL
+✓ UI sin ejecución directa de protocolos
+✓ Vue 3 + Quasar + TypeScript
+✓ Composition API + script setup
+✓ Vue Router
+✓ Vue I18n
+✓ Sin Pinia
+✓ ESLint
+✓ Prettier
+```
+
+## Regla para asistentes de IA
+
+Cualquier asistente de IA que modifique este proyecto debe tratar este README y la documentación global como referencia arquitectónica.
+
+No debe reintroducir `Obtención de Datos` como módulo independiente cuando la funcionalidad corresponda a `Extraction Methods + Collector`.
+
+No debe mover la frecuencia de adquisición al Método de Extracción.
+
+No debe convertir Microsoft Teams en un protocolo.
+
+No debe implementar acceso directo a MySQL desde la UI.
+
+No debe implementar drivers, scheduler o ejecución real de adquisición dentro del frontend.

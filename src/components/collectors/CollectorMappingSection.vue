@@ -7,6 +7,12 @@
       </q-card-section>
 
       <q-table flat bordered row-key="id" :rows="rows" :columns="columns" :pagination="{ rowsPerPage: 10 }">
+        <template #body-cell-logicalField="props">
+          <q-td :props="props">{{ dataName(String(props.row.dataId)) }}</q-td>
+        </template>
+        <template #body-cell-sourceMethod="props">
+          <q-td :props="props">{{ methodName(String(props.row.acquisitionMethodId)) }}</q-td>
+        </template>
         <template #body-cell-status="props">
           <q-td :props="props">
             <q-badge :color="statusColor(props.value)" :label="statusLabel(props.value)" />
@@ -134,12 +140,12 @@
         <q-card-section v-if="selectedDetail" class="q-gutter-md">
           <div>
             <div class="text-caption text-grey-6">{{ t('collectors.mapping.data') }}</div>
-            <div class="text-subtitle2">{{ selectedDetail.dataId }}</div>
+            <div class="text-subtitle2">{{ dataName(selectedDetail.dataId) }}</div>
           </div>
 
           <div>
             <div class="text-caption text-grey-6">{{ t('collectors.mapping.origin') }}</div>
-            <div class="text-body2">{{ t('collectors.mapping.sourceMethod') }}: {{ selectedDetail.acquisitionMethodId }}</div>
+            <div class="text-body2">{{ t('collectors.mapping.sourceMethod') }}: {{ methodName(selectedDetail.acquisitionMethodId) }}</div>
             <div class="text-body2">{{ t('collectors.mapping.sourceField') }}: {{ selectedDetail.sourceField }}</div>
           </div>
 
@@ -186,7 +192,8 @@
 import { computed, reactive, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import type { Collector, CollectorAcquisitionDataItem } from 'src/models/collector';
+import type { Collector, CollectorDataStructure } from 'src/models/collector';
+import type { ExtractionMethod } from 'src/models/extraction-method';
 import type {
   DataMapping,
   DataMappingFormValue,
@@ -194,11 +201,13 @@ import type {
   MappingTransformationType,
 } from 'src/models/mapping';
 import { mappingService } from 'src/services/mapping.service';
+import { collectorService } from 'src/services/collector.service';
 
-const props = defineProps<{ collector: Collector }>();
+const props = defineProps<{ collector: Collector; extractionMethods: ExtractionMethod[] }>();
 const { t } = useI18n();
 
 const rows = ref<DataMapping[]>([]);
+const dataStructure = ref<CollectorDataStructure | null>(null);
 const dialogOpen = ref(false);
 const detailDialogOpen = ref(false);
 const formError = ref('');
@@ -219,119 +228,26 @@ const form = reactive<DataMappingFormValue>({
   destinationField: '',
 });
 
-const defaultDataItems: CollectorAcquisitionDataItem[] = [
-  {
-    id: 'data-numero-llamadas',
-    name: 'NumeroLlamadas',
-    description: 'Número total de llamadas',
-    status: 'ACTIVE',
-    methodType: 'API',
-    methodName: 'API - CDR',
-    connection: { name: 'API - CDR', type: 'API', status: 'OK', url: 'https://api.example.com', port: 443, authentication: 'Bearer', timeout: 30, tls: true },
-    extraction: { name: 'API extraction', method: 'GET', httpMethod: 'GET', endpoint: '/cdr', responseFormat: 'JSON', jsonPath: 'data.totalCalls' },
-  },
-  {
-    id: 'data-calling-number',
-    name: 'CallingNumber',
-    description: 'Número de origen',
-    status: 'ACTIVE',
-    methodType: 'API',
-    methodName: 'API - CDR',
-    connection: { name: 'API - CDR', type: 'API', status: 'OK', url: 'https://api.example.com', port: 443, authentication: 'Bearer', timeout: 30, tls: true },
-    extraction: { name: 'API extraction', method: 'GET', httpMethod: 'GET', endpoint: '/cdr', responseFormat: 'JSON', jsonPath: 'data.callingNumber' },
-  },
-  {
-    id: 'data-duration',
-    name: 'Duration',
-    description: 'Duración de la llamada',
-    status: 'ACTIVE',
-    methodType: 'API',
-    methodName: 'API - CDR',
-    connection: { name: 'API - CDR', type: 'API', status: 'OK', url: 'https://api.example.com', port: 443, authentication: 'Bearer', timeout: 30, tls: true },
-    extraction: { name: 'API extraction', method: 'GET', httpMethod: 'GET', endpoint: '/cdr', responseFormat: 'JSON', jsonPath: 'data.duration' },
-  },
-  {
-    id: 'data-start-time',
-    name: 'StartTime',
-    description: 'Hora de inicio de la llamada',
-    status: 'ACTIVE',
-    methodType: 'API',
-    methodName: 'API - CDR',
-    connection: { name: 'API - CDR', type: 'API', status: 'OK', url: 'https://api.example.com', port: 443, authentication: 'Bearer', timeout: 30, tls: true },
-    extraction: { name: 'API extraction', method: 'GET', httpMethod: 'GET', endpoint: '/cdr', responseFormat: 'JSON', jsonPath: 'data.startTime' },
-  },
-];
+const selectedMethodData = computed(() => props.extractionMethods
+  .filter((method) => props.collector.extractionMethodIds.includes(method.id))
+  .flatMap((method) => method.availableData)
+  .filter((item) => props.collector.selectedData.includes(item.id)));
+const dataOptions = computed(() => selectedMethodData.value.map((item) => ({ label: item.name, value: item.id })));
+const sourceMethodOptions = computed(() => props.extractionMethods
+  .filter((method) => props.collector.extractionMethodIds.includes(method.id)
+    && method.availableData.some((item) => item.id === form.dataId))
+  .map((method) => ({
+    label: `${t(`extractionMethods.types.${method.type}`)} - ${method.name}`,
+    value: method.id,
+  })));
+const sourceFieldOptions = computed(() => selectedMethodData.value
+  .filter((item) => item.id === form.dataId)
+  .map((item) => item.name));
 
-const fallbackMappings = (): DataMapping[] => [
-  {
-    id: 'mapping-default-1',
-    collectorId: props.collector.id,
-    dataId: 'NumeroLlamadas',
-    acquisitionMethodId: 'API - CDR',
-    sourceField: 'totalCalls',
-    transformation: 'NONE',
-    transformationConfig: null,
-    destinationTable: 'calls',
-    destinationField: 'total_calls',
-    status: 'CONFIGURADA',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'mapping-default-2',
-    collectorId: props.collector.id,
-    dataId: 'CallingNumber',
-    acquisitionMethodId: 'API - CDR',
-    sourceField: 'callingNumber',
-    transformation: 'NONE',
-    transformationConfig: null,
-    destinationTable: 'calls',
-    destinationField: 'calling_number',
-    status: 'CONFIGURADA',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
-const dataOptions = computed(() => {
-  const config = (props.collector.configuration ?? {}) as Record<string, unknown>;
-  const acquisitionData = Array.isArray(config.acquisitionData)
-    ? (config.acquisitionData as CollectorAcquisitionDataItem[])
-    : defaultDataItems;
-
-  return acquisitionData.map((item) => ({
-    label: item.name,
-    value: item.name,
-  }));
-});
-
-const sourceFieldMap: Record<string, string[]> = {
-  NumeroLlamadas: ['totalCalls'],
-  CallingNumber: ['callingNumber'],
-  CalledNumber: ['calledNumber'],
-  Duration: ['duration'],
-  StartTime: ['startTime'],
-};
-
-const sourceMethodOptions = computed(() => {
-  const selected = dataOptions.value.find((item) => item.value === form.dataId);
-  if (!selected) return ['API - CDR', 'SNMP - Equipo', 'Webhook - Eventos', 'Microsoft Teams'];
-  const item = defaultDataItems.find((entry) => entry.name === selected.value);
-  return item ? [item.methodName] : ['API - CDR'];
-});
-
-const sourceFieldOptions = computed(() => {
-  const values = sourceFieldMap[form.dataId] ?? ['totalCalls', 'callingNumber', 'calledNumber', 'duration', 'startTime'];
-  return values;
-});
-
-const destinationStructure: Record<string, string[]> = {
-  calls: ['id', 'calling_number', 'called_number', 'duration', 'start_time', 'status', 'total_calls'],
-  call_events: ['id', 'call_id', 'event_type', 'event_at'],
-};
-
-const destinationTableOptions = computed(() => Object.keys(destinationStructure));
-const destinationFieldOptions = computed(() => destinationStructure[form.destinationTable] ?? []);
+const destinationTableOptions = computed(() => dataStructure.value?.tables.map((table) => table.name) ?? []);
+const destinationFieldOptions = computed(() => dataStructure.value?.tables
+  .find((table) => table.name === form.destinationTable)
+  ?.fields.map((field) => field.name) ?? []);
 
 const transformationOptions = computed(() => [
   { label: t('collectors.mapping.transformations.NONE'), value: 'NONE' },
@@ -362,17 +278,23 @@ const requiredRule = (value: string | null | undefined): boolean | string => !!v
 watch(
   () => props.collector.id,
   async () => {
-    await loadMappings();
+    await Promise.all([loadMappings(), loadDataStructure()]);
   },
   { immediate: true },
 );
 
+async function loadDataStructure(): Promise<void> {
+  dataStructure.value = await collectorService.getDataStructure(props.collector.id);
+}
+
 watch(
   () => form.dataId,
   (nextValue) => {
-    const item = defaultDataItems.find((entry) => entry.name === nextValue);
-    form.acquisitionMethodId = item?.methodName ?? 'API - CDR';
-    const values = sourceFieldMap[nextValue] ?? ['totalCalls'];
+    const method = props.extractionMethods.find((candidate) =>
+      props.collector.extractionMethodIds.includes(candidate.id)
+      && candidate.availableData.some((item) => item.id === nextValue));
+    form.acquisitionMethodId = method?.id ?? '';
+    const values = selectedMethodData.value.filter((item) => item.id === nextValue).map((item) => item.name);
     if (!values.includes(form.sourceField)) {
       form.sourceField = values[0] ?? '';
     }
@@ -381,8 +303,8 @@ watch(
 
 watch(
   () => form.destinationTable,
-  (nextTable) => {
-    const values = destinationStructure[nextTable] ?? [];
+  () => {
+    const values = destinationFieldOptions.value;
     if (!values.includes(form.destinationField)) {
       form.destinationField = values[0] ?? '';
     }
@@ -415,7 +337,7 @@ watch(
 
 async function loadMappings(): Promise<void> {
   const mappings = await mappingService.listMappings(props.collector.id);
-  rows.value = mappings.length > 0 ? mappings : fallbackMappings();
+  rows.value = mappings;
 }
 
 function transformationLabel(value: MappingTransformationType): string {
@@ -432,14 +354,23 @@ function transformationLabel(value: MappingTransformationType): string {
   return mapping[value] ?? value;
 }
 
+function dataName(id: string): string {
+  return selectedMethodData.value.find((item) => item.id === id)?.name ?? id;
+}
+
+function methodName(id: string): string {
+  const method = props.extractionMethods.find((item) => item.id === id);
+  return method ? `${t(`extractionMethods.types.${method.type}`)} - ${method.name}` : id;
+}
+
 function resetForm(): void {
   form.collectorId = props.collector.id;
   form.dataId = dataOptions.value[0]?.value ?? '';
-  form.acquisitionMethodId = sourceMethodOptions.value[0] ?? '';
+  form.acquisitionMethodId = sourceMethodOptions.value[0]?.value ?? '';
   form.sourceField = sourceFieldOptions.value[0] ?? '';
   form.transformation = 'NONE';
   form.transformationConfig = null;
-  form.destinationTable = destinationTableOptions.value[0] ?? 'calls';
+  form.destinationTable = destinationTableOptions.value[0] ?? '';
   form.destinationField = destinationFieldOptions.value[0] ?? '';
   transformationConfigText.value = '';
   formError.value = '';

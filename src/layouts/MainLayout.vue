@@ -157,22 +157,23 @@
           <q-tooltip>{{ t('menu.dashboard') }}</q-tooltip>
         </q-item>
 
-        <q-expansion-item icon="tune" :label="t('menu.acquisition')" default-opened>
-          <q-item
-            v-for="item in acquisitionItems"
-            :key="item.route"
-            clickable
-            :to="{ name: item.route }"
-            active-class="km-active"
-            class="q-pl-xl"
-          >
-            <q-item-section avatar>
-              <q-icon :name="item.icon" />
-            </q-item-section>
-            <q-item-section>{{ t(item.label) }}</q-item-section>
-          </q-item>
-          <q-tooltip>{{ t('menu.acquisition') }}</q-tooltip>
-        </q-expansion-item>
+        <q-item clickable :to="{ name: 'extraction-methods' }" active-class="km-active">
+          <q-item-section avatar><q-icon name="cable" /></q-item-section>
+          <q-item-section>{{ t('menu.extractionMethods') }}</q-item-section>
+          <q-tooltip>{{ t('menu.extractionMethods') }}</q-tooltip>
+        </q-item>
+
+        <q-item clickable :to="{ name: 'collectors' }" active-class="km-active">
+          <q-item-section avatar><q-icon name="sync_alt" /></q-item-section>
+          <q-item-section>{{ t('menu.collectors') }}</q-item-section>
+          <q-tooltip>{{ t('menu.collectors') }}</q-tooltip>
+        </q-item>
+
+        <q-item clickable :to="{ name: 'storage' }" active-class="km-active">
+          <q-item-section avatar><q-icon name="storage" /></q-item-section>
+          <q-item-section>{{ t('menu.storage') }}</q-item-section>
+          <q-tooltip>{{ t('menu.storage') }}</q-tooltip>
+        </q-item>
 
         <q-expansion-item icon="settings" :label="t('menu.configuration')">
           <q-item clickable :to="{ name: 'settings' }" active-class="km-active" class="q-pl-xl">
@@ -210,12 +211,6 @@ const installationMode = ref<InstallationMode | null>(null);
 const drawer = ref(true);
 const mini = ref(false);
 const skinOptions = Object.values(skins);
-
-const acquisitionItems = [
-  { route: 'equipment', label: 'menu.equipment', icon: 'dns' },
-  { route: 'origins', label: 'menu.origins', icon: 'source' },
-  { route: 'collectors', label: 'menu.collectors', icon: 'sync_alt' },
-];
 
 onMounted(async () => {
   restore();

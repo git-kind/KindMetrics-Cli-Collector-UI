@@ -22,6 +22,8 @@ import {
 import type { CollectorRepository } from '../collector.repository';
 
 const collectorRecords = shallowRef<Collector[]>(structuredClone(collectorsMock));
+const initialCollectorRecords = structuredClone(collectorsMock);
+const seededCompanyIds = new Set(collectorsMock.map((collector) => collector.companyId));
 const collectorStructures = shallowRef<Record<string, CollectorDataStructure>>({});
 let nextId = 1;
 let nextTableId = 1;
@@ -83,6 +85,10 @@ function keyForStructure(companyId: string, collectorId: string): string {
   return `${companyId}:${collectorId}`;
 }
 
+function keyForLogs(companyId: string, collectorId: string): string {
+  return `${companyId}:${collectorId}`;
+}
+
 function getStructureState(companyId: string, collectorId: string): CollectorDataStructure {
   const key = keyForStructure(companyId, collectorId);
   let structure = collectorStructures.value[key];
@@ -111,14 +117,26 @@ function validateField(field: Partial<CollectorField>, fields: CollectorField[])
 }
 
 function findCollector(companyId: string, id: string): Collector | undefined {
+  ensureCompanySeeded(companyId);
   return collectorRecords.value.find(
     (collector) => collector.companyId === companyId && collector.id === id,
   );
 }
 
+function ensureCompanySeeded(companyId: string): void {
+  if (seededCompanyIds.has(companyId)) return;
+
+  const companySeeds = initialCollectorRecords
+    .filter((collector) => collector.companyId === 'demo')
+    .map((collector) => ({ ...clone(collector), companyId }));
+  collectorRecords.value = [...collectorRecords.value, ...companySeeds];
+  seededCompanyIds.add(companyId);
+}
+
 export class MockCollectorRepository implements CollectorRepository {
   async list(companyId: string, filters: CollectorFilters): Promise<Collector[]> {
     await delay();
+    ensureCompanySeeded(companyId);
     const search = filters.search.trim().toLocaleLowerCase();
     return collectorRecords.value
       .filter((collector) => collector.companyId === companyId)
@@ -217,7 +235,84 @@ export class MockCollectorRepository implements CollectorRepository {
   async getLogs(companyId: string, id: string): Promise<CollectorLogMock[] | null> {
     await delay();
     if (!findCollector(companyId, id)) return null;
-    return clone(collectorLogsMock[id] ?? []);
+    const key = keyForLogs(companyId, id);
+    if (!collectorLogsMock[key]) collectorLogsMock[key] = clone(collectorLogsMock[id] ?? []);
+    return clone(collectorLogsMock[key] ?? []);
+  }
+
+  async executeCollector(companyId: string, id: string): Promise<CollectorTestResultMock | null> {
+    const collector = findCollector(companyId, id);
+    if (!collector) return null;
+    await delay(650);
+    const timestamp = new Date().toISOString();
+    const executionId = `run-${id}-${Date.now()}`;
+    const success = collector.status === 'ACTIVE';
+    const durationMs = success ? 420 : 1850;
+    const recordsProcessed = success ? 125 : 0;
+    const result: CollectorTestResultMock = {
+      status: success ? 'SUCCESS' : 'ERROR',
+      messageKey: success ? 'collectors.tests.success' : 'collectors.tests.error',
+      durationMs,
+    };
+    collector.lastExecutionAt = timestamp;
+    collector.lastExecutionStatus = result.status;
+    collector.updatedAt = timestamp;
+    collectorRecords.value = [...collectorRecords.value];
+    const messages = success
+      ? ['collectors.mockLogs.executionStarted', 'collectors.mockLogs.recordsObtained', 'collectors.mockLogs.mappingCompleted', 'collectors.mockLogs.synchronizationStarted', 'collectors.mockLogs.recordsSynchronized']
+      : ['collectors.mockLogs.executionFailed'];
+    const logs: CollectorLogMock[] = messages.map((messageKey, index) => ({
+      id: `${executionId}-${index}`,
+      timestamp,
+      level: success && index === messages.length - 1 ? 'SUCCESS' : success ? 'INFO' : 'ERROR',
+      messageKey,
+      executionId,
+      errorKey: success ? null : 'collectors.mockErrors.inactive',
+      durationMs: index === messages.length - 1 ? durationMs : null,
+      recordsProcessed: success ? recordsProcessed : 0,
+    }));
+    const logKey = keyForLogs(companyId, id);
+    const existingLogs = collectorLogsMock[logKey] ?? clone(collectorLogsMock[id] ?? []);
+    collectorLogsMock[logKey] = [...logs, ...existingLogs];
+    return result;
+  }
+
+  async synchronizeCollector(companyId: string, id: string): Promise<boolean> {
+    const collector = findCollector(companyId, id);
+    if (!collector) return false;
+    await delay(350);
+    const timestamp = new Date().toISOString();
+    const config = collector.configuration as Record<string, unknown>;
+    const currentSync = (config.synchronization ?? {}) as Record<string, unknown>;
+    collector.configuration = {
+      ...config,
+      synchronization: {
+        ...currentSync,
+        enabled: true,
+        destination: 'KIND (Mock)',
+        frequency: (currentSync.frequency as string | undefined) ?? 'Every 1 minute',
+        lastSyncAt: timestamp,
+        pendingRecords: 0,
+        sentRecords: Number(currentSync.sentRecords ?? 0) + 125,
+        errorRecords: Number(currentSync.errorRecords ?? 0),
+        result: 'SUCCESS',
+      },
+    };
+    collector.updatedAt = timestamp;
+    collectorRecords.value = [...collectorRecords.value];
+    const logKey = keyForLogs(companyId, id);
+    const logs = collectorLogsMock[logKey] ?? clone(collectorLogsMock[id] ?? []);
+    collectorLogsMock[logKey] = [{
+      id: `sync-${id}-${Date.now()}`,
+      timestamp,
+      level: 'SUCCESS',
+      messageKey: 'collectors.mockLogs.recordsSynchronized',
+      executionId: `sync-${id}-${Date.now()}`,
+      errorKey: null,
+      durationMs: 240,
+      recordsProcessed: 125,
+    }, ...logs];
+    return true;
   }
 
   async executeTest(

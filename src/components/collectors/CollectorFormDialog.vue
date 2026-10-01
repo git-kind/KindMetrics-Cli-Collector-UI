@@ -35,6 +35,28 @@
             :label="t('collectors.fields.description')"
             :placeholder="t('collectors.form.descriptionPlaceholder')"
           />
+          <q-select
+            v-model="draft.extractionMethodIds"
+            outlined
+            multiple
+            use-chips
+            emit-value
+            map-options
+            :options="extractionMethodOptions"
+            option-label="label"
+            option-value="value"
+            :label="t('collectors.extraction.methods')"
+          />
+          <div v-if="selectedMethodData.length" class="available-data-section">
+            <div class="text-subtitle2 text-weight-medium">{{ t('collectors.extraction.availableData') }}</div>
+            <q-option-group
+              v-model="draft.selectedData"
+              :options="selectedMethodData"
+              type="checkbox"
+              color="primary"
+              inline
+            />
+          </div>
           <q-input
             v-model.trim="draft.type"
             outlined
@@ -114,11 +136,13 @@ import type {
   CollectorFormValue,
   CollectorReferenceData,
 } from 'src/models/collector';
+import type { ExtractionMethod } from 'src/models/extraction-method';
 
 const props = defineProps<{
   modelValue: boolean;
   collector: Collector | null;
   references: CollectorReferenceData;
+  extractionMethods: ExtractionMethod[];
   saving: boolean;
   errorMessage: string;
 }>();
@@ -134,6 +158,14 @@ const configurationJson = ref('{}');
 const isEditing = computed(() => props.collector !== null);
 const equipmentOptions = computed(() => props.references.equipment);
 const originVersionOptions = computed(() => props.references.originVersions);
+const extractionMethodOptions = computed(() => props.extractionMethods.map((method) => ({
+  label: `${t(`extractionMethods.types.${method.type}`)} - ${method.name}`,
+  value: method.id,
+})));
+const selectedMethodData = computed(() => props.extractionMethods
+  .filter((method) => draft.extractionMethodIds.includes(method.id))
+  .flatMap((method) => method.availableData)
+  .map((item) => ({ label: item.name, value: item.id })));
 const requiredRule = (value: string) => !!value?.trim() || t('common.required');
 
 watch(
@@ -146,11 +178,18 @@ watch(
   { immediate: true },
 );
 
+watch(selectedMethodData, (availableData) => {
+  const availableIds = new Set(availableData.map((item) => item.value));
+  draft.selectedData = draft.selectedData.filter((id) => availableIds.has(id));
+});
+
 function emptyForm(): CollectorFormValue {
   return {
     code: '',
     name: '',
     description: '',
+    extractionMethodIds: [],
+    selectedData: [],
     type: null,
     equipmentId: null,
     originVersionId: null,
@@ -169,6 +208,8 @@ function formValueFromCollector(collector: Collector): CollectorFormValue {
     code: collector.code,
     name: collector.name,
     description: collector.description,
+    extractionMethodIds: [...collector.extractionMethodIds],
+    selectedData: [...collector.selectedData],
     type: collector.type,
     equipmentId: collector.equipmentId,
     originVersionId: collector.originVersionId,

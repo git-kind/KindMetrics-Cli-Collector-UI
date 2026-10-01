@@ -45,6 +45,8 @@ const columns = computed<QTableColumn[]>(() => [
   { name: 'level', label: t('collectors.logs.level'), field: 'level', align: 'left' },
   { name: 'message', label: t('collectors.logs.message'), field: 'message', align: 'left' },
   { name: 'executionId', label: t('collectors.logs.execution'), field: 'executionId', align: 'left' },
+  { name: 'durationMs', label: t('collectors.logs.duration'), field: 'durationMs', align: 'right' },
+  { name: 'recordsProcessed', label: t('collectors.logs.recordsProcessed'), field: 'recordsProcessed', align: 'right' },
   { name: 'error', label: t('collectors.logs.error'), field: 'error', align: 'left' },
 ]);
 

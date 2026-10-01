@@ -21,9 +21,9 @@ const mappingRecords = shallowRef<Record<string, DataMapping[]>>({
     {
       id: 'mapping-co-1-1',
       collectorId: 'co-1',
-      dataId: 'NumeroLlamadas',
-      acquisitionMethodId: 'API - CDR',
-      sourceField: 'totalCalls',
+      dataId: 'audiocodes-calls',
+      acquisitionMethodId: 'method-snmp-audiocodes',
+      sourceField: 'Calls',
       transformation: 'NONE',
       transformationConfig: null,
       destinationTable: 'calls',
@@ -35,9 +35,9 @@ const mappingRecords = shallowRef<Record<string, DataMapping[]>>({
     {
       id: 'mapping-co-1-2',
       collectorId: 'co-1',
-      dataId: 'CallingNumber',
-      acquisitionMethodId: 'API - CDR',
-      sourceField: 'callingNumber',
+      dataId: 'audiocodes-channels',
+      acquisitionMethodId: 'method-snmp-audiocodes',
+      sourceField: 'Channels',
       transformation: 'NONE',
       transformationConfig: null,
       destinationTable: 'calls',
@@ -52,6 +52,24 @@ const mappingRecords = shallowRef<Record<string, DataMapping[]>>({
 let nextMappingId = 1;
 const clone = <Value>(value: Value): Value => JSON.parse(JSON.stringify(value)) as Value;
 
+function ensureMappings(collectorId: string): DataMapping[] {
+  const current = mappingRecords.value[collectorId];
+  if (current) return current;
+  const originalCollectorId = collectorId.split(':').at(-1) ?? collectorId;
+  const seed = mappingRecords.value[originalCollectorId] ?? [];
+  const companyMappings = seed.map((mapping, index) => ({
+    ...clone(mapping),
+    id: `${mapping.id}-${collectorId.replace(/[^\da-z-]/gi, '-')}`,
+    collectorId,
+    createdAt: mapping.createdAt,
+    updatedAt: mapping.updatedAt,
+    ...(originalCollectorId === 'co-1' && index === 0 ? { dataId: 'audiocodes-calls', acquisitionMethodId: 'method-snmp-audiocodes', sourceField: 'Calls' } : {}),
+    ...(originalCollectorId === 'co-1' && index === 1 ? { dataId: 'audiocodes-channels', acquisitionMethodId: 'method-snmp-audiocodes', sourceField: 'Channels' } : {}),
+  }));
+  mappingRecords.value = { ...mappingRecords.value, [collectorId]: companyMappings };
+  return companyMappings;
+}
+
 const resolveStatus = (value: DataMappingFormValue): DataMapping['status'] => {
   const hasRequiredFields =
     value.dataId.trim() &&
@@ -65,7 +83,7 @@ const resolveStatus = (value: DataMappingFormValue): DataMapping['status'] => {
 };
 
 const isDuplicateMapping = (collectorId: string, value: DataMappingFormValue, excludeId?: string): boolean => {
-  const current = mappingRecords.value[collectorId] ?? [];
+  const current = ensureMappings(collectorId);
   return current.some((item) => {
     if (excludeId && item.id === excludeId) return false;
     return (
@@ -80,12 +98,12 @@ const isDuplicateMapping = (collectorId: string, value: DataMappingFormValue, ex
 
 export class MockMappingRepository implements MappingRepository {
   async listMappings(collectorId: string): Promise<DataMapping[]> {
-    const records = mappingRecords.value[collectorId] ?? [];
+    const records = ensureMappings(collectorId);
     return clone(records);
   }
 
   async getMapping(collectorId: string, id: string): Promise<DataMapping | null> {
-    const found = (mappingRecords.value[collectorId] ?? []).find((item) => item.id === id);
+    const found = ensureMappings(collectorId).find((item) => item.id === id);
     return found ? clone(found) : null;
   }
 
@@ -106,7 +124,7 @@ export class MockMappingRepository implements MappingRepository {
       updatedAt: timestamp,
     };
 
-    const current = mappingRecords.value[collectorId] ?? [];
+    const current = ensureMappings(collectorId);
     mappingRecords.value = {
       ...mappingRecords.value,
       [collectorId]: [...current, nextItem],
@@ -116,7 +134,7 @@ export class MockMappingRepository implements MappingRepository {
   }
 
   async updateMapping(collectorId: string, id: string, value: DataMappingFormValue): Promise<DataMapping | null> {
-    const current = mappingRecords.value[collectorId] ?? [];
+    const current = ensureMappings(collectorId);
     const index = current.findIndex((item) => item.id === id);
     if (index === -1) return null;
 
@@ -144,7 +162,7 @@ export class MockMappingRepository implements MappingRepository {
   }
 
   async deleteMapping(collectorId: string, id: string): Promise<boolean> {
-    const current = mappingRecords.value[collectorId] ?? [];
+    const current = ensureMappings(collectorId);
     const nextList = current.filter((item) => item.id !== id);
     if (nextList.length === current.length) return false;
     mappingRecords.value = { ...mappingRecords.value, [collectorId]: nextList };
@@ -163,30 +181,6 @@ export class MockMappingRepository implements MappingRepository {
 
     if (errors.length > 0) {
       return { valid: false, errors };
-    }
-
-    const allowedDataValues = ['NumeroLlamadas', 'CallingNumber', 'CalledNumber', 'Duration', 'StartTime'];
-    if (!allowedDataValues.includes(value.dataId.trim())) {
-      errors.push('El dato debe existir en la configuración del Collector.');
-    }
-
-    const allowedMethods = ['API - CDR', 'SNMP - Equipo', 'Webhook - Eventos', 'Microsoft Teams'];
-    if (!allowedMethods.includes(value.acquisitionMethodId.trim())) {
-      errors.push('El método debe existir en la configuración del Collector.');
-    }
-
-    const allowedTables = ['calls', 'call_events'];
-    if (!allowedTables.includes(value.destinationTable.trim())) {
-      errors.push('La tabla debe existir en la estructura de datos.');
-    }
-
-    const allowedFieldsByTable: Record<string, string[]> = {
-      calls: ['id', 'calling_number', 'called_number', 'duration', 'start_time', 'status', 'total_calls'],
-      call_events: ['id', 'call_id', 'event_type', 'event_at'],
-    };
-
-    if (value.destinationTable.trim() && !allowedFieldsByTable[value.destinationTable.trim()]?.includes(value.destinationField.trim())) {
-      errors.push('El campo debe existir dentro de la tabla seleccionada.');
     }
 
     if (isDuplicateMapping(collectorId, value)) {

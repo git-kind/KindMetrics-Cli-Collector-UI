@@ -71,6 +71,8 @@ export interface Collector {
 	name: string;
 	code: string;
 	description: string;
+	extractionMethodIds: string[];
+	selectedData: string[];
 	type: string | null;
 	status: CollectorStatus;
 	equipmentId: string | null;
@@ -106,7 +108,7 @@ export interface CollectorDataStructureDefinition {
 	pendingChanges?: string[];
 }
 
-export type AcquisitionMethodType = 'API' | 'SNMP' | 'WEBHOOK' | 'MICROSOFT_TEAMS';
+export type AcquisitionMethodType = 'API' | 'SNMP' | 'WEBHOOK' | 'MICROSOFT_GRAPH';
 export type AcquisitionDataStatus = 'ACTIVE' | 'INACTIVE' | 'WARN';
 
 export interface CollectorConnectionConfig {
@@ -207,6 +209,8 @@ export interface CollectorSynchronizationState {
 	frequency: string | null;
 	lastSyncAt: string | null;
 	pendingRecords: number;
+	sentRecords: number;
+	errorRecords: number;
 	result: 'SUCCESS' | 'ERROR' | 'NOT_REQUIRED';
 }
 
@@ -215,6 +219,8 @@ export type CollectorFormValue = Pick<
 	| 'name'
 	| 'code'
 	| 'description'
+	| 'extractionMethodIds'
+	| 'selectedData'
 	| 'type'
 	| 'equipmentId'
 	| 'originVersionId'
@@ -251,10 +257,12 @@ export interface CollectorHealthMock {
 export interface CollectorLogMock {
 	id: string;
 	timestamp: string;
-	level: 'INFO' | 'WARN' | 'ERROR';
+	level: 'INFO' | 'WARN' | 'ERROR' | 'SUCCESS';
 	messageKey: string;
 	executionId: string | null;
 	errorKey: string | null;
+	durationMs?: number | null;
+	recordsProcessed?: number | null;
 }
 
 export interface CollectorTestResultMock {

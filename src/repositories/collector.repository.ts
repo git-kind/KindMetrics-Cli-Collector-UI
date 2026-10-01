@@ -24,6 +24,8 @@ export interface CollectorRepository {
 	getReferenceData(): Promise<CollectorReferenceData>;
 	getHealth(companyId: string, id: string): Promise<CollectorHealthMock | null>;
 	getLogs(companyId: string, id: string): Promise<CollectorLogMock[] | null>;
+	executeCollector(companyId: string, id: string): Promise<CollectorTestResultMock | null>;
+	synchronizeCollector(companyId: string, id: string): Promise<boolean>;
 	executeTest(companyId: string, id: string, type: CollectorTestType): Promise<CollectorTestResultMock | null>;
 	getDataStructure(companyId: string, collectorId: string): Promise<CollectorDataStructure | null>;
 	createTable(companyId: string, collectorId: string, table: Omit<CollectorTable, 'id' | 'status' | 'fields' | 'indexes'>): Promise<CollectorTable | null>;

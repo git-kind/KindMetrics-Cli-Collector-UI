@@ -54,6 +54,8 @@ export function useAuth() {
     sessionStorage.removeItem('kindmetrics-collector-user');
   }
 
+  restore();
+
   return {
     isAuthenticated,
     username,
