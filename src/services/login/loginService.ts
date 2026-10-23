@@ -1,8 +1,8 @@
-import type { User } from 'src/types/domain'
-import { users } from 'src/mocks/users'
+import { login as loginRepository } from 'src/repositories/login.repository';
+import { establishAuthSession } from 'src/services/session/authSession';
 
 export interface LoginPayload {
-  username: string;
+  email: string;
   password: string;
   rememberMe: boolean;
 }
@@ -10,23 +10,34 @@ export interface LoginPayload {
 export interface LoginResponse {
   success: boolean;
   message: string;
-  user?: User;
 }
 
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  try {
+    const response = await loginRepository({
+      email: payload.email.trim(),
+      password: payload.password,
+    });
+    const accessToken = response.accessToken
+      ?? response.access_token
+      ?? response.token
+      ?? response.data?.accessToken
+      ?? response.data?.access_token
+      ?? response.data?.token;
 
-  const user = users.find(item => item.email.split('@')[0] === payload.username.trim().toLowerCase())
-  if (user?.active && payload.password.length >= 6) {
+    if (!accessToken) {
+      return { success: false, message: 'La respuesta de autenticación no incluye un token.' };
+    }
+
+    establishAuthSession(payload.email.trim(), accessToken);
     return {
       success: true,
-      message: `Bienvenido${payload.rememberMe ? ' de nuevo' : ''}, ${payload.username.trim()}.`,
-      user: structuredClone(user),
+      message: `Bienvenido${payload.rememberMe ? ' de nuevo' : ''}, ${payload.email.trim()}.`,
+    };
+  } catch {
+    return {
+      success: false,
+      message: 'No fue posible iniciar sesión.',
     };
   }
-
-  return {
-    success: false,
-    message: 'Credenciales inválidas. Prueba con usuario "admin" y una contraseña válida.',
-  };
 }

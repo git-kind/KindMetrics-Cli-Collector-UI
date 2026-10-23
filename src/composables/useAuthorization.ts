@@ -1,28 +1,20 @@
 import { computed, ref } from 'vue';
 import type { Company } from '../models/company';
+import { login as loginService } from 'src/services/login/loginService';
+import { authenticated, clearAuthSession, username } from 'src/services/session/authSession';
 
-const authenticated = ref(false);
-const username = ref('');
 const activeCompany = ref<Company | null>(null);
 const companyContextKey = 'kindmetrics-active-company';
 
 export function useAuth() {
   const isAuthenticated = computed(() => authenticated.value);
 
-  async function login(user: string, password: string): Promise<boolean> {
-    if (user.trim() !== 'admin' || password.length <= 6) {
-      return false;
-    }
-    username.value = user;
-    authenticated.value = true;
-    sessionStorage.setItem('kindmetrics-collector-auth', '1');
-    sessionStorage.setItem('kindmetrics-collector-user', user.trim());
-    return true;
+  async function login(email: string, password: string, rememberMe = false): Promise<boolean> {
+    const result = await loginService({ email, password, rememberMe });
+    return result.success;
   }
 
   function restore() {
-    authenticated.value = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
-    username.value = sessionStorage.getItem('kindmetrics-collector-user') ?? '';
     const savedCompany = sessionStorage.getItem(companyContextKey);
     if (savedCompany) {
       try {
@@ -47,11 +39,8 @@ export function useAuth() {
   }
 
   function logout() {
-    authenticated.value = false;
-    username.value = '';
+    clearAuthSession();
     clearActiveCompany();
-    sessionStorage.removeItem('kindmetrics-collector-auth');
-    sessionStorage.removeItem('kindmetrics-collector-user');
   }
 
   restore();
@@ -70,8 +59,7 @@ export function useAuth() {
 
 export function useAuthorization() {
   function can(permission: string): boolean {
-    const authenticated = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
-    return authenticated && [
+    return authenticated.value && [
       'dashboard.view',
       'user.view',
       'collector.view',

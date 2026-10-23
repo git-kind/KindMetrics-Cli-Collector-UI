@@ -5,6 +5,7 @@ export default configure(() => ({
   css: ['app.scss'],
   extras: ['material-icons'],
   build: {
+    envFiles: process.env.APP_ENV === 'qa' ? ['.env.qa'] : [],
     target: {
       browser: ['es2022', 'chrome120', 'firefox120', 'safari16'],
       node: 'node20',

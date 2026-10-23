@@ -1,5 +1,6 @@
 import { createRouter as createVueRouter, createWebHistory } from 'vue-router';
 import { installationService } from '../services/installation.service';
+import { authenticated } from 'src/services/session/authSession';
 
 const routes = [
   {
@@ -64,8 +65,7 @@ export function createRouter() {
     if (to.name === 'installation') {
       if (mode === null) return { name: 'entry' };
       if (effectiveMode === 'KIND' && to.query.createCompany === '1') {
-        const authenticated = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
-        return authenticated ? true : { name: 'login' };
+        return authenticated.value ? true : { name: 'login' };
       }
       if (effectiveMode === 'KIND' || (effectiveMode === 'CUSTOMER' && status === 'CONFIGURED')) {
         return { name: 'login' };
@@ -77,8 +77,7 @@ export function createRouter() {
     }
     if (to.meta.public) return true;
 
-    const authenticated = sessionStorage.getItem('kindmetrics-collector-auth') === '1';
-    if (!authenticated) return { name: 'login', query: to.query };
+    if (!authenticated.value) return { name: 'login', query: to.query };
     const companySelected = sessionStorage.getItem('kindmetrics-active-company') !== null;
     const companyRoutes = ['company-select', 'company-create'];
     if (effectiveMode === 'KIND' && !companySelected && !companyRoutes.includes(String(to.name))) {

@@ -43,12 +43,12 @@
 
         <q-form ref="formRef" class="q-gutter-md" @submit.prevent="onSubmit">
           <q-input
-            v-model="username"
-            :label="t('auth.username')"
+            v-model="email"
+            :label="t('auth.email')"
             outlined
             dense
-            :rules="usernameRules"
-            autocomplete="username"
+            :rules="emailRules"
+            autocomplete="email"
           />
 
           <q-input
@@ -96,7 +96,7 @@ import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import kindLogo from 'src/assets/Kind-Logo.png';
-import { validateUsername, validatePassword } from 'src/helpers/login/loginHelper';
+import { validateEmail, validatePassword } from 'src/helpers/login/loginHelper';
 import { useAuth } from 'src/composables/useAuthorization';
 import { installationService } from 'src/services/installation.service';
 import { companyService } from 'src/services/company.service';
@@ -105,14 +105,14 @@ const $q = useQuasar();
 const { t } = useI18n();
 const router = useRouter();
 const { login, setActiveCompany, clearActiveCompany, logout } = useAuth();
-const username = ref('');
+const email = ref('');
 const password = ref('');
 const rememberMe = ref(false);
 const isPasswordVisible = ref(false);
 const formRef = ref<{ validate: () => Promise<boolean> } | null>(null);
 
-const usernameRules = [
-  (value: string) => validateUsername(value, t),
+const emailRules = [
+  (value: string) => validateEmail(value, t),
 ];
 
 const passwordRules = [
@@ -126,7 +126,7 @@ async function onSubmit() {
     return;
   }
 
-  const authenticated = await login(username.value.trim(), password.value);
+  const authenticated = await login(email.value.trim(), password.value, rememberMe.value);
 
   if (authenticated) {
     $q.notify({

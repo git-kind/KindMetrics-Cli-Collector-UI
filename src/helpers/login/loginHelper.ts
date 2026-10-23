@@ -1,12 +1,12 @@
 export type ValidationResult = string | true;
 
-export function validateUsername(value: string, translate: (key: string) => string): ValidationResult {
+export function validateEmail(value: string, translate: (key: string) => string): ValidationResult {
   if (!value) {
-    return translate('auth.usernameRequired');
+    return translate('auth.emailRequired');
   }
 
-  if (value.trim().length < 3) {
-    return translate('auth.usernameMinLength');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+    return translate('auth.emailInvalid');
   }
 
   return true;

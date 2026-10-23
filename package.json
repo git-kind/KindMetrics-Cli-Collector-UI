@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "quasar dev",
+    "dev:qa": "cross-env APP_ENV=qa quasar dev",
     "build": "quasar build",
+    "build:qa": "cross-env APP_ENV=qa quasar build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -25,6 +27,7 @@
     "@types/node": "^22.15.0",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.35.0",
     "eslint-plugin-vue": "^10.4.0",
     "prettier": "^3.6.2",
