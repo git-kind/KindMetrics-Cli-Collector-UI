@@ -4,15 +4,28 @@ export interface Company {
 	id: string;
 	code: string;
 	name: string;
+	shortName: string;
 	databaseName: string;
 	status: CompanyStatus;
 	logo: string;
+	timezone: string;
+	locale: 'es' | 'en';
+	configJson: Record<string, unknown>;
 }
 
 export interface CreateCompanyInput {
 	name: string;
+	shortName: string;
 	code: string;
+	databaseName?: string;
+	timezone: string;
+	locale: 'es' | 'en';
+	configJson: Record<string, unknown>;
+}
+
+export interface UpdateCompanyInput extends Omit<CreateCompanyInput, 'databaseName'> {
 	databaseName: string;
+	status: CompanyStatus;
 }
 
 export type CreateCompanyResult =

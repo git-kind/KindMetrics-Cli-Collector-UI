@@ -39,6 +39,7 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: 'dashboard', name: 'dashboard', component: () => import('../pages/DashboardPage.vue') },
+      { path: 'admin/companies', name: 'companies', component: () => import('../pages/company/CompaniesPage.vue') },
       { path: 'equipment', name: 'equipment', component: () => import('../pages/EquipmentPage.vue') },
       { path: 'origins', name: 'origins', component: () => import('../pages/OriginsPage.vue') },
       { path: 'extraction-methods', name: 'extraction-methods', component: () => import('../pages/ExtractionMethodsPage.vue') },
@@ -78,9 +79,17 @@ export function createRouter() {
     if (to.meta.public) return true;
 
     if (!authenticated.value) return { name: 'login', query: to.query };
+    if (to.name === 'companies' && effectiveMode !== 'KIND') return { name: 'dashboard' };
     const companySelected = sessionStorage.getItem('kindmetrics-active-company') !== null;
     const companyRoutes = ['company-select', 'company-create'];
-    if (effectiveMode === 'KIND' && !companySelected && !companyRoutes.includes(String(to.name))) {
+    const companyAdminRoute = to.name === 'companies';
+    if (
+      effectiveMode === 'KIND'
+      && !companySelected
+      && !companyRoutes.includes(String(to.name))
+      && !companyAdminRoute
+      && to.name !== 'dashboard'
+    ) {
       return { name: 'company-select' };
     }
     if (effectiveMode === 'CUSTOMER' && !companySelected) {

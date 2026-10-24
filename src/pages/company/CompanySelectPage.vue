@@ -1,6 +1,6 @@
 <template>
   <q-page class="company-page q-pa-lg">
-    <CompanySelectComponent @select="selectCompany" @create="goToCreate" />
+    <CompanySelectComponent @select="selectCompany" @create="goToCreate" @skip="skipSelection" />
   </q-page>
 </template>
 
@@ -20,6 +20,10 @@ function selectCompany(company: Company): void {
 
 function goToCreate(): void {
   void router.push({ name: 'company-create' });
+}
+
+function skipSelection(): void {
+  void router.replace({ name: 'dashboard' });
 }
 </script>
 

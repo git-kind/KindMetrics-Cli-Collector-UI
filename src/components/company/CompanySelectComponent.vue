@@ -12,6 +12,12 @@
         :label="t('companyContext.createAction')"
         @click="emit('create')"
       />
+      <q-btn
+        flat
+        icon="arrow_forward"
+        :label="t('companyContext.skipSelection')"
+        @click="emit('skip')"
+      />
     </div>
 
     <q-banner v-if="loadFailed" class="q-mb-md" rounded>
@@ -23,16 +29,22 @@
           <q-avatar color="primary" text-color="white" icon="business" />
         </q-item-section>
         <q-item-section>
-          <q-item-label class="text-weight-medium">{{ company.name }}</q-item-label>
+          <q-item-label class="text-weight-medium">{{ company.name }} ({{ company.shortName }})</q-item-label>
           <q-item-label caption>
             {{ t('companyContext.code') }}: {{ company.code }}
             <span class="company-database">{{ t('companyContext.databaseName') }}: {{ company.databaseName }}</span>
+          </q-item-label>
+          <q-item-label caption>
+            <q-badge :color="company.status === 'ACTIVE' ? 'positive' : 'grey-7'">
+              {{ company.status === 'ACTIVE' ? t('common.active') : t('common.inactive') }}
+            </q-badge>
           </q-item-label>
         </q-item-section>
         <q-item-section side>
           <q-btn
             color="primary"
             outline
+            :disable="company.status !== 'ACTIVE'"
             :label="t('companyContext.selectAction')"
             @click="emit('select', company)"
           />
@@ -57,6 +69,7 @@ import { companyService } from '../../services/company.service';
 const emit = defineEmits<{
   (event: 'select', company: Company): void;
   (event: 'create'): void;
+  (event: 'skip'): void;
 }>();
 
 const { t } = useI18n();

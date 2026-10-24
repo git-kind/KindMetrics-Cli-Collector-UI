@@ -23,7 +23,7 @@
           class="km-company-context"
           flat
           no-caps
-          :label="`${t('companyContext.currentlyManaging')}: ${company?.name ?? ''}`"
+          :label="company ? `${t('companyContext.currentlyManaging')}: ${company.name}` : t('companyContext.noneSelected')"
           icon="business"
         >
             <q-menu
@@ -173,6 +173,12 @@
           <q-item-section avatar><q-icon name="storage" /></q-item-section>
           <q-item-section>{{ t('menu.storage') }}</q-item-section>
           <q-tooltip>{{ t('menu.storage') }}</q-tooltip>
+        </q-item>
+
+        <q-item v-if="installationMode === 'KIND'" clickable :to="{ name: 'companies' }" active-class="km-active">
+          <q-item-section avatar><q-icon name="business" /></q-item-section>
+          <q-item-section>{{ t('menu.companies') }}</q-item-section>
+          <q-tooltip>{{ t('menu.companies') }}</q-tooltip>
         </q-item>
 
         <q-expansion-item icon="settings" :label="t('menu.configuration')">

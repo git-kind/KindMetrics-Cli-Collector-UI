@@ -4,8 +4,8 @@
     <div>
       <q-form class="q-gutter-md" @submit.prevent="createCompany">
         <q-input v-model="form.name" outlined :label="t('companyContext.name')" :rules="[requiredRule]" />
+        <q-input v-model="form.shortName" outlined :label="t('companyContext.shortName')" :rules="[requiredRule]" />
         <q-input v-model="form.code" outlined :label="t('companyContext.code')" :rules="[requiredRule]" />
-        <q-input v-model="form.databaseName" outlined :label="t('companyContext.databaseName')" :rules="[requiredRule]" />
         <q-banner v-if="errorKey" rounded class="form-error">
           {{ t(errorKey) }}
         </q-banner>
@@ -36,7 +36,9 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const form = reactive<CreateCompanyInput>({ name: '', code: '', databaseName: '' });
+const form = reactive<CreateCompanyInput>({
+  name: '', shortName: '', code: '', timezone: 'UTC', locale: 'es', configJson: {},
+});
 const saving = ref(false);
 const errorKey = ref('');
 const requiredRule = (value: string) => !!value.trim() || t('common.required');
@@ -47,14 +49,12 @@ async function createCompany(): Promise<void> {
   try {
     const result = await companyService.createCompany(form);
     if (!result.success) {
-      errorKey.value = result.reason === 'duplicate'
-        ? 'companyContext.duplicate'
-        : 'companyContext.required';
+      errorKey.value = result.reason === 'duplicate' ? 'companyContext.duplicate' : 'companyContext.required';
       return;
     }
     emit('created', result.company);
-  } catch {
-    errorKey.value = 'companyContext.createError';
+  } catch (error) {
+    errorKey.value = error instanceof Error ? error.message : t('companyContext.createError');
   } finally {
     saving.value = false;
   }

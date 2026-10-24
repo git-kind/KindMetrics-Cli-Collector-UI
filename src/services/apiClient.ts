@@ -1,7 +1,10 @@
 import axios from 'axios';
 import { getAccessToken } from 'src/services/session/authSession';
 
-const apiBaseUrl = process.env.VITE_API_BASE_URL?.replace(/\/+$/, '');
+const configuredApiBaseUrl = process.env.VITE_API_BASE_URL;
+const apiBaseUrl = (configuredApiBaseUrl || (process.env.NODE_ENV === 'development'
+  ? 'http://127.0.0.1:3010'
+  : undefined))?.replace(/\/+$/, '');
 
 export const apiClient = axios.create({
   ...(apiBaseUrl ? { baseURL: apiBaseUrl } : {}),

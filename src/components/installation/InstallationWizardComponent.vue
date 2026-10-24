@@ -62,31 +62,24 @@
       <q-step :name="2" :title="t('installation.steps.database')" icon="storage" :done="step > 2">
         <InstallationDatabaseStepComponent
           :database="database"
-          :readonly="isKindCompanySetup"
+          :state="connectionState"
+          :message-key="connectionMessageKey"
+          :kind-company-setup="isKindCompanySetup"
           @update:database="updateDatabase"
           @back="step = 1"
           @continue="nextFromDatabase"
-        />
-      </q-step>
-
-      <q-step :name="3" :title="t('installation.steps.connection')" icon="cable" :done="step > 3">
-        <InstallationConnectionStepComponent
-          :database="database"
-          :state="connectionState"
-          :message-key="connectionMessageKey"
-          @back="step = 2"
+          @return-to-companies="returnToCompanySelection"
           @test="runConnectionTest"
-          @continue="step = 4"
         />
       </q-step>
 
-      <q-step :name="4" :title="t('installation.steps.save')" icon="save">
+      <q-step v-if="!isKindCompanySetup" :name="3" :title="t('installation.steps.save')" icon="save">
         <InstallationSaveStepComponent
           :company-id="company?.id ?? companyId"
           :connection-state="connectionState"
           :saving="saving"
           :save-failed="saveFailed"
-          @back="step = 3"
+          @back="step = 2"
           @save="saveConfiguration"
         />
       </q-step>
@@ -95,14 +88,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import kindLogo from 'src/assets/Kind-Logo.png';
 import CompanyCreateComponent from 'src/components/company/CompanyCreateComponent.vue';
 import type { Company } from 'src/models/company';
+import { companyService } from 'src/services/company.service';
 import InstallationCompanyStepComponent from './InstallationCompanyStepComponent.vue';
-import InstallationConnectionStepComponent from './InstallationConnectionStepComponent.vue';
 import InstallationDatabaseStepComponent from './InstallationDatabaseStepComponent.vue';
 import InstallationSaveStepComponent from './InstallationSaveStepComponent.vue';
 import { useUi } from 'src/composables/useUi';
@@ -138,11 +131,6 @@ const languageOptions = [
   { label: 'ES', value: 'es' },
   { label: 'EN', value: 'en' },
 ];
-watch(database, () => {
-  connectionState.value = 'idle';
-  saveFailed.value = false;
-}, { deep: true });
-
 onMounted(async () => {
   try {
     status.value = await installationService.getStatus();
@@ -158,9 +146,11 @@ function onKindCompanyCreated(createdCompany: Company): void {
     id: createdCompany.id,
     code: createdCompany.code,
     name: createdCompany.name,
-    databaseName: createdCompany.databaseName,
+    databaseName: '',
   };
-  database.databaseName = createdCompany.databaseName;
+  database.databaseName = '';
+  connectionState.value = 'idle';
+  saveFailed.value = false;
   step.value = 2;
 }
 
@@ -184,23 +174,47 @@ async function nextFromCompany(): Promise<void> {
 }
 
 async function nextFromDatabase(): Promise<void> {
+  if (isKindCompanySetup.value) {
+    if (connectionState.value === 'success' && company.value) {
+      emit('configured', 'KIND', company.value.id);
+    }
+    return;
+  }
   step.value = 3;
 }
 
 function updateDatabase(value: DatabaseConfiguration): void {
+  if (value.databaseName !== database.databaseName) {
+    connectionState.value = 'idle';
+    saveFailed.value = false;
+  }
   Object.assign(database, value);
 }
 
 async function runConnectionTest(): Promise<void> {
+  if (!company.value || (!isKindCompanySetup.value && !database.databaseName.trim())) {
+    connectionState.value = 'error';
+    connectionMessageKey.value = 'installation.connection.error';
+    return;
+  }
+
   connectionState.value = 'testing';
   saveFailed.value = false;
   try {
-    const result = await installationService.testConnection({ ...database });
-    connectionState.value = result.success ? 'success' : 'error';
-    connectionMessageKey.value = result.messageKey;
-  } catch {
+    const result = await companyService.createCompanyDatabase(company.value.id);
+    if (result.companyGuid !== company.value.id || !result.databaseName.trim()) {
+      throw new Error('El API devolvió un resultado de base de datos inválido.');
+    }
+    database.databaseName = result.databaseName;
+    connectionState.value = 'success';
+    connectionMessageKey.value = result.created
+      ? 'installation.connection.databaseCreated'
+      : 'installation.connection.databaseAlreadyExists';
+  } catch (error) {
     connectionState.value = 'error';
-    connectionMessageKey.value = 'installation.connection.error';
+    connectionMessageKey.value = error instanceof Error
+      ? error.message
+      : 'installation.connection.error';
   }
 }
 
@@ -209,11 +223,6 @@ async function saveConfiguration(): Promise<void> {
   saving.value = true;
   saveFailed.value = false;
   try {
-    if (isKindCompanySetup.value) {
-      emit('configured', 'KIND', company.value.id);
-      return;
-    }
-
     const configured = await installationService.saveConfiguration({
       companyId: company.value.id,
       database: { ...database },
