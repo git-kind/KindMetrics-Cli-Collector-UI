@@ -28,7 +28,7 @@ function ensureApiConfigured(): void {
 export async function getAllCompanies(): Promise<Company[]> {
   ensureApiConfigured();
   return withApiErrors(async () => {
-    const response = await apiClient.get<CompanyApiResponse<unknown[]>>('/api/v1/companies');
+    const response = await apiClient.get<CompanyApiResponse<unknown[]>>('/companies');
     if (response.data.success === false) {
       throw new Error(response.data.message ?? 'El API no pudo cargar las empresas.');
     }
@@ -43,7 +43,7 @@ export async function getCompanyById(id: string): Promise<Company | null> {
   ensureApiConfigured();
   return withApiErrors(async () => {
     const response = await apiClient.get<CompanyApiResponse<unknown>>(
-      `/api/v1/companies/${encodeURIComponent(id)}`,
+      `/companies/${encodeURIComponent(id)}`,
     );
     return response.data.data ? mapCompany(response.data.data) : null;
   });
@@ -53,7 +53,7 @@ export async function createCompany(input: CreateCompanyInput): Promise<Company 
   ensureApiConfigured();
   const { databaseName, ...companyFields } = input;
   return withApiErrors(async () => {
-    const response = await apiClient.post<CompanyApiResponse<unknown>>('/api/v1/companies', {
+    const response = await apiClient.post<CompanyApiResponse<unknown>>('/companies', {
       ...companyFields,
       status: 'ACTIVE',
       configJson: databaseName
@@ -69,7 +69,7 @@ export async function updateCompany(id: string, input: UpdateCompanyInput): Prom
   const { databaseName, ...companyFields } = input;
   return withApiErrors(async () => {
     const response = await apiClient.patch<CompanyApiResponse<unknown>>(
-      `/api/v1/companies/${encodeURIComponent(id)}`,
+      `/companies/${encodeURIComponent(id)}`,
       { ...companyFields, configJson: { ...input.configJson, databaseName } },
     );
     return response.data.data ? mapCompany(response.data.data) : null;
@@ -80,7 +80,7 @@ export async function deleteCompany(id: string): Promise<boolean> {
   ensureApiConfigured();
   return withApiErrors(async () => {
     const response = await apiClient.delete<CompanyApiResponse<unknown>>(
-      `/api/v1/companies/${encodeURIComponent(id)}`,
+      `/companies/${encodeURIComponent(id)}`,
     );
     return response.data.success;
   });
@@ -163,7 +163,7 @@ export async function createCompanyDatabase(companyGuid: string): Promise<Compan
   ensureApiConfigured();
   return withApiErrors(async () => {
     const response = await apiClient.post<CompanyApiResponse<CompanyDatabaseResult>>(
-      `/api/v1/companies/${encodeURIComponent(companyGuid)}/database`,
+      `/companies/${encodeURIComponent(companyGuid)}/database`,
     );
     if (response.status !== 200) {
       throw new Error(`La API respondió con HTTP ${response.status} al verificar la base de datos.`);

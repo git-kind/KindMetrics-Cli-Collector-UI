@@ -4,10 +4,10 @@
       {{ t('installation.database.title') }}
     </div>
     <p class="step-description">
-      {{ t(kindCompanySetup ? 'installation.database.apiManagedDescription' : readonly ? 'installation.database.companyCreatedDescription' : 'installation.database.description') }}
+      {{ t(kindCompanySetup ? 'installation.database.kindCompanyDescription' : readonly ? 'installation.database.companyCreatedDescription' : 'installation.database.description') }}
     </p>
       <q-input
-        v-if="!readonly && !kindCompanySetup"
+        v-if="!readonly"
       :model-value="database.databaseName"
       outlined
       :readonly="readonly"
@@ -15,7 +15,7 @@
       :rules="[requiredRule]"
       @update:model-value="updateField('databaseName', String($event ?? ''))"
     />
-      <div v-else-if="!kindCompanySetup" class="database-summary">
+      <div v-else class="database-summary">
         <span>{{ t('installation.database.databaseName') }}</span>
         <strong>{{ database.databaseName }}</strong>
       </div>

@@ -21,7 +21,7 @@ export async function login(credentials: LoginCredentials): Promise<LoginApiResp
     throw new Error('VITE_API_BASE_URL no está configurada.');
   }
 
-  const response = await apiClient.post<LoginApiResponse>('/api/v1/auth/login', credentials);
+  const response = await apiClient.post<LoginApiResponse>('/auth/login', credentials);
 
   return response.data;
 }

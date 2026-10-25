@@ -116,7 +116,9 @@ const { currentSkin, setLanguage } = useUi();
 const route = useRoute();
 const router = useRouter();
 const mode = ref<InstallationMode | null>(null);
-const isKindCompanySetup = computed(() => mode.value === 'KIND' && route.query.createCompany === '1');
+const isKindCompanySetup = computed(() => mode.value === 'KIND' && (
+  route.query.createCompany === '1' || typeof route.query.companyId === 'string'
+));
 const step = ref(1);
 const status = ref<InstallationStatus>('NOT_CONFIGURED');
 const companyId = ref('7f8c2a91-4f12-4a6d-b123-9c1e8d7f1234');
@@ -136,6 +138,21 @@ onMounted(async () => {
     status.value = await installationService.getStatus();
     mode.value = await installationService.getMode();
     if (mode.value === 'CUSTOMER') await resolveCompany();
+    if (mode.value === 'KIND' && typeof route.query.companyId === 'string') {
+      const existingCompany = await companyService.getCompany(route.query.companyId);
+      if (!existingCompany) {
+        await router.replace({ name: 'companies' });
+        return;
+      }
+      company.value = {
+        id: existingCompany.id,
+        code: existingCompany.code,
+        name: existingCompany.name,
+        databaseName: existingCompany.databaseName,
+      };
+      database.databaseName = existingCompany.databaseName;
+      step.value = 2;
+    }
   } catch {
     status.value = 'ERROR';
   }
@@ -155,7 +172,7 @@ function onKindCompanyCreated(createdCompany: Company): void {
 }
 
 function returnToCompanySelection(): void {
-  void router.push({ name: 'company-select' });
+  void router.push({ name: route.query.companyId ? 'companies' : 'company-select' });
 }
 
 async function resolveCompany(): Promise<void> {
@@ -192,7 +209,7 @@ function updateDatabase(value: DatabaseConfiguration): void {
 }
 
 async function runConnectionTest(): Promise<void> {
-  if (!company.value || (!isKindCompanySetup.value && !database.databaseName.trim())) {
+  if (!company.value || !database.databaseName.trim()) {
     connectionState.value = 'error';
     connectionMessageKey.value = 'installation.connection.error';
     return;

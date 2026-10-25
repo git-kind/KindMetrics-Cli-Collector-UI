@@ -3,9 +3,7 @@
     <div class="text-h5 q-mb-md">{{ t('companyContext.createTitle') }}</div>
     <div>
       <q-form class="q-gutter-md" @submit.prevent="createCompany">
-        <q-input v-model="form.name" outlined :label="t('companyContext.name')" :rules="[requiredRule]" />
-        <q-input v-model="form.shortName" outlined :label="t('companyContext.shortName')" :rules="[requiredRule]" />
-        <q-input v-model="form.code" outlined :label="t('companyContext.code')" :rules="[requiredRule]" />
+        <CompanyFieldsComponent :model-value="form" @update:model-value="Object.assign(form, $event)" />
         <q-banner v-if="errorKey" rounded class="form-error">
           {{ t(errorKey) }}
         </q-banner>
@@ -29,6 +27,7 @@ import { reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Company, CreateCompanyInput } from '../../models/company';
 import { companyService } from '../../services/company.service';
+import CompanyFieldsComponent from './CompanyFieldsComponent.vue';
 
 const emit = defineEmits<{
   (event: 'created', company: Company): void;
@@ -41,8 +40,6 @@ const form = reactive<CreateCompanyInput>({
 });
 const saving = ref(false);
 const errorKey = ref('');
-const requiredRule = (value: string) => !!value.trim() || t('common.required');
-
 async function createCompany(): Promise<void> {
   errorKey.value = '';
   saving.value = true;

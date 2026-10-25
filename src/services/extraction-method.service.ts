@@ -7,7 +7,7 @@ import type {
   ExtractionMethodType,
   ExtractionAvailableData,
 } from '../models/extraction-method';
-import { mockExtractionMethodRepository } from '../repositories/mock/extraction-method.repository';
+import { apiExtractionMethodRepository } from '../repositories/extraction-method.api.repository';
 import type { ExtractionMethodRepository } from '../repositories/extraction-method.repository';
 
 export class ExtractionMethodService {
@@ -77,4 +77,4 @@ function activeCompanyId(): string {
   return id;
 }
 
-export const extractionMethodService = new ExtractionMethodService(mockExtractionMethodRepository, activeCompanyId);
+export const extractionMethodService = new ExtractionMethodService(apiExtractionMethodRepository, activeCompanyId);

@@ -3,7 +3,7 @@ import { getAccessToken } from 'src/services/session/authSession';
 
 const configuredApiBaseUrl = process.env.VITE_API_BASE_URL;
 const apiBaseUrl = (configuredApiBaseUrl || (process.env.NODE_ENV === 'development'
-  ? 'http://127.0.0.1:3010'
+  ? 'http://127.0.0.1:3010/api/v1'
   : undefined))?.replace(/\/+$/, '');
 
 export const apiClient = axios.create({

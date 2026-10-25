@@ -1,5 +1,12 @@
 export type CompanyStatus = 'ACTIVE' | 'INACTIVE';
 
+export interface CompanyFormFields {
+	name: string;
+	shortName: string;
+	code: string;
+	status?: CompanyStatus;
+}
+
 export interface Company {
 	id: string;
 	code: string;

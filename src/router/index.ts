@@ -65,7 +65,9 @@ export function createRouter() {
     if (to.name === 'entry') return true;
     if (to.name === 'installation') {
       if (mode === null) return { name: 'entry' };
-      if (effectiveMode === 'KIND' && to.query.createCompany === '1') {
+      if (effectiveMode === 'KIND' && (
+        to.query.createCompany === '1' || typeof to.query.companyId === 'string'
+      )) {
         return authenticated.value ? true : { name: 'login' };
       }
       if (effectiveMode === 'KIND' || (effectiveMode === 'CUSTOMER' && status === 'CONFIGURED')) {
