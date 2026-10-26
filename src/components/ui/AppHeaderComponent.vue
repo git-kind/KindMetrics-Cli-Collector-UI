@@ -12,7 +12,11 @@
       />
 
       <div class="brand-wrap q-ml-md">
-        <img :src="kindLogo" alt="Kind Technologies logo" class="header-logo" />
+        <img
+          :src="kindLogo"
+          alt="Kind Technologies logo"
+          class="header-logo"
+        >
         <div>
           <b>{{ t('app.name') }}</b>
           <div class="text-caption muted">
@@ -69,14 +73,24 @@
       >
         <q-menu>
           <q-list style="min-width:180px">
-            <q-item v-close-popup clickable>
+            <q-item
+              v-close-popup
+              clickable
+            >
               <q-item-section>{{ t('userMenu.profile') }}</q-item-section>
             </q-item>
-            <q-item v-close-popup clickable @click="$emit('logout')">
+            <q-item
+              v-close-popup
+              clickable
+              @click="$emit('logout')"
+            >
               <q-item-section>{{ t('userMenu.preferences') }}</q-item-section>
             </q-item>
             <q-separator />
-            <q-item v-close-popup clickable>
+            <q-item
+              v-close-popup
+              clickable
+            >
               <q-item-section>
                 {{ t('userMenu.logout') }}
               </q-item-section>

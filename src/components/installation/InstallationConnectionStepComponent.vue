@@ -3,15 +3,22 @@
     <div class="text-subtitle1 text-weight-medium q-mb-sm">
       {{ t('installation.connection.title') }}
     </div>
-    <p class="step-description">{{ t('installation.connection.description') }}</p>
+    <p class="step-description">
+      {{ t('installation.connection.description') }}
+    </p>
     <div class="connection-summary">
       <div>
         <span>{{ t('installation.database.databaseName') }}</span>
         <strong>{{ database.databaseName }}</strong>
       </div>
     </div>
-    <div class="mock-hint">{{ t('installation.connection.mockHint') }}</div>
-    <q-badge :color="stateColor" class="q-mt-md">
+    <div class="mock-hint">
+      {{ t('installation.connection.mockHint') }}
+    </div>
+    <q-badge
+      :color="stateColor"
+      class="q-mt-md"
+    >
       {{ t(`installation.connection.states.${state}`) }}
     </q-badge>
     <q-banner
@@ -26,7 +33,12 @@
       {{ t(messageKey) }}
     </q-banner>
     <div class="step-actions step-actions-split">
-      <q-btn flat :label="t('common.back')" icon="arrow_back" @click="emit('back')" />
+      <q-btn
+        flat
+        :label="t('common.back')"
+        icon="arrow_back"
+        @click="emit('back')"
+      />
       <div class="row items-center q-gutter-sm">
         <q-btn
           outline

@@ -1,16 +1,33 @@
 <template>
-  <q-dialog :model-value="modelValue" persistent @update:model-value="emit('update:modelValue', $event)">
+  <q-dialog
+    :model-value="modelValue"
+    persistent
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <q-card class="collector-form-dialog">
       <q-card-section class="row items-center">
-        <div class="text-h6">{{ t(isEditing ? 'collectors.form.editTitle' : 'collectors.form.createTitle') }}</div>
+        <div class="text-h6">
+          {{ t(isEditing ? 'collectors.form.editTitle' : 'collectors.form.createTitle') }}
+        </div>
         <q-space />
-        <q-btn v-close-popup flat round dense icon="close" :aria-label="t('common.cancel')" />
+        <q-btn
+          v-close-popup
+          flat
+          round
+          dense
+          icon="close"
+          :aria-label="t('common.cancel')"
+        />
       </q-card-section>
 
       <q-separator />
 
       <q-card-section>
-        <q-form ref="formRef" class="q-gutter-md" @submit.prevent="submit">
+        <q-form
+          ref="formRef"
+          class="q-gutter-md"
+          @submit.prevent="submit"
+        >
           <q-input
             v-model.trim="draft.code"
             outlined
@@ -47,8 +64,13 @@
             option-value="value"
             :label="t('collectors.extraction.methods')"
           />
-          <div v-if="selectedMethodData.length" class="available-data-section">
-            <div class="text-subtitle2 text-weight-medium">{{ t('collectors.extraction.availableData') }}</div>
+          <div
+            v-if="selectedMethodData.length"
+            class="available-data-section"
+          >
+            <div class="text-subtitle2 text-weight-medium">
+              {{ t('collectors.extraction.availableData') }}
+            </div>
             <q-option-group
               v-model="draft.selectedData"
               :options="selectedMethodData"
@@ -105,7 +127,11 @@
             :label="t('collectors.fields.configuration')"
             :rules="[configurationRule]"
           />
-          <q-banner v-if="errorMessage" rounded class="bg-negative text-white">
+          <q-banner
+            v-if="errorMessage"
+            rounded
+            class="bg-negative text-white"
+          >
             {{ errorMessage }}
           </q-banner>
         </q-form>
@@ -113,8 +139,15 @@
 
       <q-separator />
 
-      <q-card-actions align="right" class="q-pa-md">
-        <q-btn flat :label="t('common.cancel')" @click="close" />
+      <q-card-actions
+        align="right"
+        class="q-pa-md"
+      >
+        <q-btn
+          flat
+          :label="t('common.cancel')"
+          @click="close"
+        />
         <q-btn
           color="primary"
           unelevated
@@ -136,7 +169,7 @@ import type {
   CollectorFormValue,
   CollectorReferenceData,
 } from 'src/models/collector';
-import type { ExtractionMethod } from 'src/models/extraction-method';
+import { getAvailableDataFromMethod, type ExtractionMethod } from 'src/models/extraction-method';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -159,12 +192,12 @@ const isEditing = computed(() => props.collector !== null);
 const equipmentOptions = computed(() => props.references.equipment);
 const originVersionOptions = computed(() => props.references.originVersions);
 const extractionMethodOptions = computed(() => props.extractionMethods.map((method) => ({
-  label: `${t(`extractionMethods.types.${method.type}`)} - ${method.name}`,
+  label: `${method.protocol} - ${method.name}`,
   value: method.id,
 })));
 const selectedMethodData = computed(() => props.extractionMethods
   .filter((method) => draft.extractionMethodIds.includes(method.id))
-  .flatMap((method) => method.availableData)
+  .flatMap(getAvailableDataFromMethod)
   .map((item) => ({ label: item.name, value: item.id })));
 const requiredRule = (value: string) => !!value?.trim() || t('common.required');
 

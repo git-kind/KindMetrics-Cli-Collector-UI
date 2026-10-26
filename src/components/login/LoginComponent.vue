@@ -3,14 +3,24 @@
     <div class="row q-col-gutter-none items-stretch">
       <div class="col-12 col-md-6 login-hero">
         <div class="brand-lockup q-mb-lg">
-          <img :src="kindLogo" alt="Kind Technologies" class="brand-image" />
+          <img
+            :src="kindLogo"
+            alt="Kind Technologies"
+            class="brand-image"
+          >
           <div>
-            <div class="text-h5 text-weight-bold text-primary">Kind Technologies</div>
-            <div class="text-body2 text-grey-7">{{ t('app.subtitle') }}</div>
+            <div class="text-h5 text-weight-bold text-primary">
+              Kind Technologies
+            </div>
+            <div class="text-body2 text-grey-7">
+              {{ t('app.subtitle') }}
+            </div>
           </div>
         </div>
 
-        <div class="text-h4 text-weight-bold text-primary q-mb-sm">{{ t('auth.welcome') }}</div>
+        <div class="text-h4 text-weight-bold text-primary q-mb-sm">
+          {{ t('auth.welcome') }}
+        </div>
         <div class="text-body1 text-grey-7 q-mb-lg">
           {{ t('auth.welcomeMessage') }}
         </div>
@@ -18,30 +28,50 @@
         <q-list class="q-px-none">
           <q-item class="q-px-none q-mb-sm">
             <q-item-section avatar>
-              <q-icon name="security" color="primary" />
+              <q-icon
+                name="security"
+                color="primary"
+              />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="text-weight-medium">{{ t('auth.security') }}</q-item-label>
-              <q-item-label caption>{{ t('auth.securityDescription') }}</q-item-label>
+              <q-item-label class="text-weight-medium">
+                {{ t('auth.security') }}
+              </q-item-label>
+              <q-item-label caption>
+                {{ t('auth.securityDescription') }}
+              </q-item-label>
             </q-item-section>
           </q-item>
 
           <q-item class="q-px-none">
             <q-item-section avatar>
-              <q-icon name="route" color="secondary" />
+              <q-icon
+                name="route"
+                color="secondary"
+              />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="text-weight-medium">{{ t('auth.operation') }}</q-item-label>
-              <q-item-label caption>{{ t('auth.operationDescription') }}</q-item-label>
+              <q-item-label class="text-weight-medium">
+                {{ t('auth.operation') }}
+              </q-item-label>
+              <q-item-label caption>
+                {{ t('auth.operationDescription') }}
+              </q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
       </div>
 
       <div class="col-12 col-md-6 login-form-panel">
-        <div class="text-h5 text-weight-bold q-mb-md">{{ t('auth.signInTitle') }}</div>
+        <div class="text-h5 text-weight-bold q-mb-md">
+          {{ t('auth.signInTitle') }}
+        </div>
 
-        <q-form ref="formRef" class="q-gutter-md" @submit.prevent="onSubmit">
+        <q-form
+          ref="formRef"
+          class="q-gutter-md"
+          @submit.prevent="onSubmit"
+        >
           <q-input
             v-model="email"
             :label="t('auth.email')"
@@ -71,8 +101,16 @@
           </q-input>
 
           <div class="row items-center justify-between">
-            <q-checkbox v-model="rememberMe" :label="t('auth.rememberMe')" dense />
-            <q-btn flat color="primary" :label="t('auth.forgotPassword')" />
+            <q-checkbox
+              v-model="rememberMe"
+              :label="t('auth.rememberMe')"
+              dense
+            />
+            <q-btn
+              flat
+              color="primary"
+              :label="t('auth.forgotPassword')"
+            />
           </div>
 
           <q-btn

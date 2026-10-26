@@ -2,8 +2,12 @@
   <section class="company-page-content">
     <div class="row items-center justify-between q-mb-lg">
       <div>
-        <div class="text-h5">{{ t('companyContext.selectTitle') }}</div>
-        <div class="text-body2 km-muted">{{ t('companyContext.selectDescription') }}</div>
+        <div class="text-h5">
+          {{ t('companyContext.selectTitle') }}
+        </div>
+        <div class="text-body2 km-muted">
+          {{ t('companyContext.selectDescription') }}
+        </div>
       </div>
       <q-btn
         color="primary"
@@ -20,16 +24,33 @@
       />
     </div>
 
-    <q-banner v-if="loadFailed" class="q-mb-md" rounded>
+    <q-banner
+      v-if="loadFailed"
+      class="q-mb-md"
+      rounded
+    >
       {{ t('companyContext.loadError') }}
     </q-banner>
-    <q-list bordered separator>
-      <q-item v-for="company in companies" :key="company.id" class="company-row">
+    <q-list
+      bordered
+      separator
+    >
+      <q-item
+        v-for="company in companies"
+        :key="company.id"
+        class="company-row"
+      >
         <q-item-section avatar>
-          <q-avatar color="primary" text-color="white" icon="business" />
+          <q-avatar
+            color="primary"
+            text-color="white"
+            icon="business"
+          />
         </q-item-section>
         <q-item-section>
-          <q-item-label class="text-weight-medium">{{ company.name }} ({{ company.shortName }})</q-item-label>
+          <q-item-label class="text-weight-medium">
+            {{ company.name }} ({{ company.shortName }})
+          </q-item-label>
           <q-item-label caption>
             {{ t('companyContext.code') }}: {{ company.code }}
             <span class="company-database">{{ t('companyContext.databaseName') }}: {{ company.databaseName }}</span>
@@ -54,8 +75,14 @@
         <q-item-section>{{ t('companyContext.empty') }}</q-item-section>
       </q-item>
     </q-list>
-    <div v-if="loading" class="row justify-center q-pa-lg">
-      <q-spinner color="primary" size="32px" />
+    <div
+      v-if="loading"
+      class="row justify-center q-pa-lg"
+    >
+      <q-spinner
+        color="primary"
+        size="32px"
+      />
     </div>
   </section>
 </template>

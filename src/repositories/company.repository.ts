@@ -1,6 +1,7 @@
 import type { Company, CreateCompanyInput, UpdateCompanyInput } from '../models/company';
 import axios from 'axios';
-import { apiClient } from 'src/services/apiClient';
+import { apiClient, withCompanyCode } from 'src/services/apiClient';
+import { getActiveCompanyCode } from 'src/services/session/sessionService';
 
 interface CompanyApiResponse<T> {
   success: boolean;
@@ -27,8 +28,12 @@ function ensureApiConfigured(): void {
 
 export async function getAllCompanies(): Promise<Company[]> {
   ensureApiConfigured();
+  const companyCode = getActiveCompanyCode();
+
   return withApiErrors(async () => {
-    const response = await apiClient.get<CompanyApiResponse<unknown[]>>('/companies');
+    const response = await apiClient.get<CompanyApiResponse<unknown[]>>('/companies', {
+      headers: withCompanyCode({}, companyCode),
+    });
     if (response.data.success === false) {
       throw new Error(response.data.message ?? 'El API no pudo cargar las empresas.');
     }
@@ -41,9 +46,12 @@ export async function getAllCompanies(): Promise<Company[]> {
 
 export async function getCompanyById(id: string): Promise<Company | null> {
   ensureApiConfigured();
+  const companyCode = getActiveCompanyCode();
+
   return withApiErrors(async () => {
     const response = await apiClient.get<CompanyApiResponse<unknown>>(
       `/companies/${encodeURIComponent(id)}`,
+      { headers: withCompanyCode({}, companyCode) },
     );
     return response.data.data ? mapCompany(response.data.data) : null;
   });
@@ -52,6 +60,8 @@ export async function getCompanyById(id: string): Promise<Company | null> {
 export async function createCompany(input: CreateCompanyInput): Promise<Company | null> {
   ensureApiConfigured();
   const { databaseName, ...companyFields } = input;
+  const companyCode = getActiveCompanyCode();
+
   return withApiErrors(async () => {
     const response = await apiClient.post<CompanyApiResponse<unknown>>('/companies', {
       ...companyFields,
@@ -59,6 +69,8 @@ export async function createCompany(input: CreateCompanyInput): Promise<Company 
       configJson: databaseName
         ? { ...input.configJson, databaseName }
         : input.configJson,
+    }, {
+      headers: withCompanyCode({}, companyCode),
     });
     return response.data.data ? mapCompany(response.data.data) : null;
   });
@@ -67,10 +79,13 @@ export async function createCompany(input: CreateCompanyInput): Promise<Company 
 export async function updateCompany(id: string, input: UpdateCompanyInput): Promise<Company | null> {
   ensureApiConfigured();
   const { databaseName, ...companyFields } = input;
+  const companyCode = getActiveCompanyCode();
+
   return withApiErrors(async () => {
     const response = await apiClient.patch<CompanyApiResponse<unknown>>(
       `/companies/${encodeURIComponent(id)}`,
       { ...companyFields, configJson: { ...input.configJson, databaseName } },
+      { headers: withCompanyCode({}, companyCode) },
     );
     return response.data.data ? mapCompany(response.data.data) : null;
   });
@@ -78,9 +93,12 @@ export async function updateCompany(id: string, input: UpdateCompanyInput): Prom
 
 export async function deleteCompany(id: string): Promise<boolean> {
   ensureApiConfigured();
+  const companyCode = getActiveCompanyCode();
+
   return withApiErrors(async () => {
     const response = await apiClient.delete<CompanyApiResponse<unknown>>(
       `/companies/${encodeURIComponent(id)}`,
+      { headers: withCompanyCode({}, companyCode) },
     );
     return response.data.success;
   });
@@ -161,9 +179,13 @@ export interface CompanyDatabaseResult {
 
 export async function createCompanyDatabase(companyGuid: string): Promise<CompanyDatabaseResult> {
   ensureApiConfigured();
+  const companyCode = getActiveCompanyCode();
+
   return withApiErrors(async () => {
     const response = await apiClient.post<CompanyApiResponse<CompanyDatabaseResult>>(
       `/companies/${encodeURIComponent(companyGuid)}/database`,
+      undefined,
+      { headers: withCompanyCode({}, companyCode) },
     );
     if (response.status !== 200) {
       throw new Error(`La API respondió con HTTP ${response.status} al verificar la base de datos.`);

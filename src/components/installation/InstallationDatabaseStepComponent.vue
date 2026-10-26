@@ -1,13 +1,17 @@
 <template>
-  <q-form ref="formRef" class="step-content" @submit.prevent="continueToConnection">
+  <q-form
+    ref="formRef"
+    class="step-content"
+    @submit.prevent="continueToConnection"
+  >
     <div class="text-subtitle1 text-weight-medium q-mb-sm">
       {{ t('installation.database.title') }}
     </div>
     <p class="step-description">
       {{ t(kindCompanySetup ? 'installation.database.kindCompanyDescription' : readonly ? 'installation.database.companyCreatedDescription' : 'installation.database.description') }}
     </p>
-      <q-input
-        v-if="!readonly"
+    <q-input
+      v-if="!readonly"
       :model-value="database.databaseName"
       outlined
       :readonly="readonly"
@@ -15,34 +19,40 @@
       :rules="[requiredRule]"
       @update:model-value="updateField('databaseName', String($event ?? ''))"
     />
-      <div v-else class="database-summary">
-        <span>{{ t('installation.database.databaseName') }}</span>
-        <strong>{{ database.databaseName }}</strong>
-      </div>
-      <div class="row items-center q-gutter-sm q-mt-md">
-        <q-btn
-          outline
-          color="primary"
-          :loading="state === 'testing'"
-          :label="t('installation.connection.validate')"
-          icon="cable"
-          @click="testConnection"
-        />
-        <q-badge v-if="state !== 'idle'" :color="stateColor">
-          {{ t(`installation.connection.states.${state}`) }}
-        </q-badge>
-      </div>
-      <q-banner
-        v-if="state === 'success' || state === 'error'"
-        rounded
-        :class="['connection-result', state]"
-        class="q-mt-md"
+    <div
+      v-else
+      class="database-summary"
+    >
+      <span>{{ t('installation.database.databaseName') }}</span>
+      <strong>{{ database.databaseName }}</strong>
+    </div>
+    <div class="row items-center q-gutter-sm q-mt-md">
+      <q-btn
+        outline
+        color="primary"
+        :loading="state === 'testing'"
+        :label="t('installation.connection.validate')"
+        icon="cable"
+        @click="testConnection"
+      />
+      <q-badge
+        v-if="state !== 'idle'"
+        :color="stateColor"
       >
-        <template #avatar>
-          <q-icon :name="state === 'success' ? 'check_circle' : 'error'" />
-        </template>
-        {{ t(messageKey) }}
-      </q-banner>
+        {{ t(`installation.connection.states.${state}`) }}
+      </q-badge>
+    </div>
+    <q-banner
+      v-if="state === 'success' || state === 'error'"
+      rounded
+      :class="['connection-result', state]"
+      class="q-mt-md"
+    >
+      <template #avatar>
+        <q-icon :name="state === 'success' ? 'check_circle' : 'error'" />
+      </template>
+      {{ t(messageKey) }}
+    </q-banner>
     <div class="step-actions step-actions-split">
       <q-btn
         flat

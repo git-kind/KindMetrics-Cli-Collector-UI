@@ -1,19 +1,41 @@
 <template>
   <div class="q-gutter-md">
-    <q-banner rounded class="bg-blue-grey-1 text-blue-grey-10">
-      <template #avatar><q-icon name="info" color="primary" /></template>
+    <q-banner
+      rounded
+      class="bg-blue-grey-1 text-blue-grey-10"
+    >
+      <template #avatar>
+        <q-icon
+          name="info"
+          color="primary"
+        />
+      </template>
       {{ t('collectors.execution.mockNotice') }}
     </q-banner>
 
-    <q-card flat bordered class="rounded-borders">
+    <q-card
+      flat
+      bordered
+      class="rounded-borders"
+    >
       <q-card-section>
-        <div class="text-subtitle1 text-weight-medium">{{ t('collectors.execution.title') }}</div>
+        <div class="text-subtitle1 text-weight-medium">
+          {{ t('collectors.execution.title') }}
+        </div>
       </q-card-section>
       <q-separator />
-      <q-list dense separator>
-        <q-item v-for="item in items" :key="item.label">
+      <q-list
+        dense
+        separator
+      >
+        <q-item
+          v-for="item in items"
+          :key="item.label"
+        >
           <q-item-section>
-            <q-item-label caption>{{ item.label }}</q-item-label>
+            <q-item-label caption>
+              {{ item.label }}
+            </q-item-label>
             <q-item-label>{{ item.value }}</q-item-label>
           </q-item-section>
         </q-item>

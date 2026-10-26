@@ -1,11 +1,22 @@
 <template>
-  <q-card class="installation-card" :style="{ '--install-accent': currentSkin.primary }">
+  <q-card
+    class="installation-card"
+    :style="{ '--install-accent': currentSkin.primary }"
+  >
     <header class="installation-header">
       <div class="brand-lockup">
-        <img :src="kindLogo" alt="Kind Technologies" class="brand-logo" />
+        <img
+          :src="kindLogo"
+          alt="Kind Technologies"
+          class="brand-logo"
+        >
         <div>
-          <div class="brand-name">Kind Technologies</div>
-          <div class="brand-product">{{ t('app.title') }}</div>
+          <div class="brand-name">
+            Kind Technologies
+          </div>
+          <div class="brand-product">
+            {{ t('app.title') }}
+          </div>
         </div>
       </div>
       <q-btn-toggle
@@ -21,16 +32,31 @@
     </header>
 
     <div class="wizard-heading">
-      <div class="eyebrow">{{ t('installation.eyebrow') }}</div>
+      <div class="eyebrow">
+        {{ t('installation.eyebrow') }}
+      </div>
       <h1>{{ t('installation.title') }}</h1>
       <p>{{ t('installation.subtitle') }}</p>
-      <q-badge v-if="mode !== 'KIND'" :color="status === 'ERROR' ? 'negative' : 'warning'" class="q-mt-sm">
+      <q-badge
+        v-if="mode !== 'KIND'"
+        :color="status === 'ERROR' ? 'negative' : 'warning'"
+        class="q-mt-sm"
+      >
         {{ t(status === 'ERROR' ? 'installation.status.error' : 'installation.status.notConfigured') }}
       </q-badge>
     </div>
 
-    <q-banner v-if="status === 'ERROR'" rounded class="status-banner q-mb-md">
-      <template #avatar><q-icon name="warning" color="negative" /></template>
+    <q-banner
+      v-if="status === 'ERROR'"
+      rounded
+      class="status-banner q-mb-md"
+    >
+      <template #avatar>
+        <q-icon
+          name="warning"
+          color="negative"
+        />
+      </template>
       {{ t('installation.status.error') }}
     </q-banner>
 
@@ -42,7 +68,12 @@
       color="primary"
       class="installation-stepper"
     >
-      <q-step :name="1" :title="t('installation.steps.company')" icon="business" :done="step > 1">
+      <q-step
+        :name="1"
+        :title="t('installation.steps.company')"
+        icon="business"
+        :done="step > 1"
+      >
         <InstallationCompanyStepComponent
           v-if="mode === 'CUSTOMER'"
           :company-id="companyId"
@@ -59,7 +90,12 @@
         />
       </q-step>
 
-      <q-step :name="2" :title="t('installation.steps.database')" icon="storage" :done="step > 2">
+      <q-step
+        :name="2"
+        :title="t('installation.steps.database')"
+        icon="storage"
+        :done="step > 2"
+      >
         <InstallationDatabaseStepComponent
           :database="database"
           :state="connectionState"
@@ -73,7 +109,12 @@
         />
       </q-step>
 
-      <q-step v-if="!isKindCompanySetup" :name="3" :title="t('installation.steps.save')" icon="save">
+      <q-step
+        v-if="!isKindCompanySetup"
+        :name="3"
+        :title="t('installation.steps.save')"
+        icon="save"
+      >
         <InstallationSaveStepComponent
           :company-id="company?.id ?? companyId"
           :connection-state="connectionState"

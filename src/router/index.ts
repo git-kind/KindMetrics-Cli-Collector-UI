@@ -1,6 +1,6 @@
 import { createRouter as createVueRouter, createWebHistory } from 'vue-router';
 import { installationService } from '../services/installation.service';
-import { authenticated } from 'src/services/session/authSession';
+import { authenticated, restore, useSession } from 'src/services/session/sessionService';
 
 const routes = [
   {
@@ -53,12 +53,14 @@ const routes = [
 ];
 
 export function createRouter() {
+  const { activeCompany } = useSession();
   const router = createVueRouter({
     history: createWebHistory(),
     routes,
   });
 
   router.beforeEach(async (to) => {
+    restore();
     const mode = await installationService.getMode();
     const status = await installationService.getStatus();
     const effectiveMode = mode ?? (status === 'CONFIGURED' ? 'CUSTOMER' : null);
@@ -82,7 +84,7 @@ export function createRouter() {
 
     if (!authenticated.value) return { name: 'login', query: to.query };
     if (to.name === 'companies' && effectiveMode !== 'KIND') return { name: 'dashboard' };
-    const companySelected = sessionStorage.getItem('kindmetrics-active-company') !== null;
+    const companySelected = Boolean(activeCompany.value?.id);
     const companyRoutes = ['company-select', 'company-create'];
     const companyAdminRoute = to.name === 'companies';
     if (

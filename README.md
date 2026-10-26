@@ -76,6 +76,20 @@ Define:
 
 ## Frecuencia de adquisición
 
+## Administración de Métodos de Extracción en la UI
+
+El módulo existente permite listar, filtrar por texto/protocolo/estado, ordenar y paginar métodos; crear, editar, duplicar, activar/desactivar y eliminar definiciones; y administrar parámetros, requests, fields, versiones de solo lectura y asociaciones por equipo. Las operaciones de datos pasan por `ExtractionMethodService` y el Repository API existente. Los formularios conservan la configuración como objetos JSON tipados en lugar de exponer secretos.
+
+El contrato REST de métodos y asociaciones está documentado como provisional y debe verificarse contra OpenAPI del `KindMetrics-Cli-Collector-API`. El API ya documenta CRUD administrativo para los catálogos de proveedores y conectores, pero esta UI todavía no lo integra. El detalle de payloads, capacidades, autenticaciones y versiones de conectores debe confirmarse antes de implementar sus Repositories. Registrar un conector no instala ni actualiza su driver ejecutable.
+
+También queda pendiente resolver la diferencia conceptual entre la documentación de dominio actual, donde `ExtractionMethod` es una conexión concreta, y el contrato relacional provisional/UI, donde el método es una definición reutilizable y la asociación por equipo contiene configuración de conexión. Hasta cerrar esa decisión, no se debe mover credenciales ni modificar el modelo persistido.
+
+La configuración de requests permanece como JSON genérico. Formularios específicos por conector (por ejemplo, campos SNMP v3, paginación REST/Graph y consultas SQL parametrizadas) requieren un esquema de capacidades/versiones del conector y validación autoritativa del backend; la UI no ejecuta comandos SSH ni SQL.
+
+La autorización de operaciones de extracción también depende de permisos efectivos entregados por la API. La visibilidad de acciones en la interfaz no reemplaza la autorización del servidor.
+
+## Frecuencia de adquisición
+
 La frecuencia de obtención de datos pertenece al **Collector**, dentro de `Ejecución`.
 
 No pertenece al Método de Extracción.

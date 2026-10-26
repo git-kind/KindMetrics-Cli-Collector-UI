@@ -1,14 +1,32 @@
 <template>
   <div>
-    <q-banner rounded class="bg-blue-grey-1 text-blue-grey-10 q-mb-md">
-      <template #avatar><q-icon name="info" color="primary" /></template>
+    <q-banner
+      rounded
+      class="bg-blue-grey-1 text-blue-grey-10 q-mb-md"
+    >
+      <template #avatar>
+        <q-icon
+          name="info"
+          color="primary"
+        />
+      </template>
       {{ t('collectors.tests.mockNotice') }}
     </q-banner>
-    <q-list bordered separator class="rounded-borders">
-      <q-item v-for="test in tests" :key="test.type">
+    <q-list
+      bordered
+      separator
+      class="rounded-borders"
+    >
+      <q-item
+        v-for="test in tests"
+        :key="test.type"
+      >
         <q-item-section>
           <q-item-label>{{ t(test.label) }}</q-item-label>
-          <q-item-label v-if="results[test.type]" caption>
+          <q-item-label
+            v-if="results[test.type]"
+            caption
+          >
             {{ t(results[test.type]!.messageKey) }}
             <span> · {{ t('collectors.units.milliseconds', { count: results[test.type]!.durationMs }) }}</span>
           </q-item-label>
@@ -24,7 +42,10 @@
             @click="execute(test.type)"
           />
         </q-item-section>
-        <q-item-section side v-if="results[test.type]">
+        <q-item-section
+          v-if="results[test.type]"
+          side
+        >
           <q-badge
             :color="results[test.type]?.status === 'SUCCESS' ? 'positive' : 'negative'"
             :label="t(`collectors.testStatus.${results[test.type]?.status.toLowerCase()}`)"

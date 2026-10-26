@@ -57,21 +57,30 @@
         icon="monitor"
         :label="t('nav.monitoring')"
       >
-        <q-item clickable to="/monitoring/metrics">
+        <q-item
+          clickable
+          to="/monitoring/metrics"
+        >
           <q-item-section avatar>
             <q-icon name="speed" />
           </q-item-section>
           <q-item-section>{{ t('nav.metrics') }}</q-item-section>
         </q-item>
 
-        <q-item clickable to="/monitoring/events">
+        <q-item
+          clickable
+          to="/monitoring/events"
+        >
           <q-item-section avatar>
             <q-icon name="event" />
           </q-item-section>
           <q-item-section>{{ t('nav.events') }}</q-item-section>
         </q-item>
 
-        <q-item clickable to="/monitoring/alerts">
+        <q-item
+          clickable
+          to="/monitoring/alerts"
+        >
           <q-item-section avatar>
             <q-icon name="notifications_active" />
           </q-item-section>
@@ -83,21 +92,31 @@
         icon="settings"
         :label="t('nav.administration')"
       >
-        <q-item clickable to="/admin/datasources">
+        <q-item
+          clickable
+          to="/admin/datasources"
+        >
           <q-item-section avatar>
             <q-icon name="storage" />
           </q-item-section>
           <q-item-section>{{ t('nav.datasources') }}</q-item-section>
         </q-item>
 
-        <q-item clickable to="/admin/companies">
+        <q-item
+          clickable
+          to="/admin/companies"
+        >
           <q-item-section avatar>
             <q-icon name="business" />
           </q-item-section>
           <q-item-section>{{ t('nav.companies') }}</q-item-section>
         </q-item>
 
-        <q-item v-if="can('user.view')" clickable to="/admin/users">
+        <q-item
+          v-if="can('user.view')"
+          clickable
+          to="/admin/users"
+        >
           <q-item-section avatar>
             <q-icon name="people" />
           </q-item-section>

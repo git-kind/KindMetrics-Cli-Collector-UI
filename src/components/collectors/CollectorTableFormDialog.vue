@@ -1,18 +1,32 @@
 <template>
-  <q-dialog :model-value="modelValue" persistent @update:model-value="emit('update:modelValue', $event)">
+  <q-dialog
+    :model-value="modelValue"
+    persistent
+    @update:model-value="emit('update:modelValue', $event)"
+  >
     <q-card class="collector-table-dialog">
       <q-card-section class="row items-center">
         <div class="text-h6">
           {{ table ? t('collectors.dataStructure.tableEditTitle') : t('collectors.dataStructure.tableCreateTitle') }}
         </div>
         <q-space />
-        <q-btn flat round dense icon="close" @click="close" />
+        <q-btn
+          flat
+          round
+          dense
+          icon="close"
+          @click="close"
+        />
       </q-card-section>
 
       <q-separator />
 
       <q-card-section>
-        <q-form ref="formRef" class="q-gutter-md" @submit.prevent="submit">
+        <q-form
+          ref="formRef"
+          class="q-gutter-md"
+          @submit.prevent="submit"
+        >
           <q-input
             v-model.trim="form.name"
             outlined
@@ -29,9 +43,20 @@
         </q-form>
       </q-card-section>
 
-      <q-card-actions align="right" class="q-pa-md">
-        <q-btn flat :label="t('common.cancel')" @click="close" />
-        <q-btn color="primary" :label="t('common.save')" @click="submit" />
+      <q-card-actions
+        align="right"
+        class="q-pa-md"
+      >
+        <q-btn
+          flat
+          :label="t('common.cancel')"
+          @click="close"
+        />
+        <q-btn
+          color="primary"
+          :label="t('common.save')"
+          @click="submit"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>

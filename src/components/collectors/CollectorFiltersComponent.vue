@@ -10,7 +10,9 @@
         :placeholder="t('collectors.filters.searchPlaceholder')"
         @update:model-value="updateFilter('search', String($event ?? ''))"
       >
-        <template #prepend><q-icon name="search" /></template>
+        <template #prepend>
+          <q-icon name="search" />
+        </template>
       </q-input>
     </div>
     <div class="col-12 col-md-4">

@@ -2,21 +2,43 @@
   <div class="collector-db-admin">
     <div class="row items-center justify-between q-mb-md">
       <div>
-        <div class="text-h6 text-weight-medium">{{ t('collectors.dataStructure.title') }}</div>
-        <div class="text-caption text-grey-6">{{ t('collectors.dataStructure.databaseLabel') }}: KindMetrics</div>
+        <div class="text-h6 text-weight-medium">
+          {{ t('collectors.dataStructure.title') }}
+        </div>
+        <div class="text-caption text-grey-6">
+          {{ t('collectors.dataStructure.databaseLabel') }}: KindMetrics
+        </div>
       </div>
-      <q-chip :color="stateColor" text-color="white" :label="t(`collectors.dataStructure.statusLabel.${statusKey}`)" />
+      <q-chip
+        :color="stateColor"
+        text-color="white"
+        :label="t(`collectors.dataStructure.statusLabel.${statusKey}`)"
+      />
     </div>
 
-    <div v-if="loading" class="row justify-center q-py-xl">
-      <q-spinner color="primary" size="30px" />
+    <div
+      v-if="loading"
+      class="row justify-center q-py-xl"
+    >
+      <q-spinner
+        color="primary"
+        size="30px"
+      />
     </div>
 
-    <q-splitter v-else v-model="splitterModel" unit="px" style="height: 720px" class="db-splitter">
+    <q-splitter
+      v-else
+      v-model="splitterModel"
+      unit="px"
+      style="height: 720px"
+      class="db-splitter"
+    >
       <template #before>
         <div class="db-sidebar">
           <div class="db-sidebar-header">
-            <div class="text-subtitle2 text-weight-medium">{{ t('collectors.dataStructure.database') }}</div>
+            <div class="text-subtitle2 text-weight-medium">
+              {{ t('collectors.dataStructure.database') }}
+            </div>
           </div>
 
           <q-input
@@ -33,7 +55,9 @@
           </q-input>
 
           <div class="row items-center justify-between q-mb-sm">
-            <div class="text-subtitle3 text-weight-medium">{{ t('collectors.dataStructure.tables') }}</div>
+            <div class="text-subtitle3 text-weight-medium">
+              {{ t('collectors.dataStructure.tables') }}
+            </div>
           </div>
 
           <q-tree
@@ -56,96 +80,231 @@
       </template>
 
       <template #after>
-        <div v-if="!selectedTable" class="empty-db-panel">
-          <div class="text-h6 text-weight-medium">{{ t('collectors.dataStructure.noTables') }}</div>
-          <q-btn class="q-mt-md" color="primary" icon="add" :label="t('collectors.dataStructure.actions.addTable')" @click="openCreateTable" />
+        <div
+          v-if="!selectedTable"
+          class="empty-db-panel"
+        >
+          <div class="text-h6 text-weight-medium">
+            {{ t('collectors.dataStructure.noTables') }}
+          </div>
+          <q-btn
+            class="q-mt-md"
+            color="primary"
+            icon="add"
+            :label="t('collectors.dataStructure.actions.addTable')"
+            @click="openCreateTable"
+          />
         </div>
 
-        <div v-else class="db-detail-panel">
+        <div
+          v-else
+          class="db-detail-panel"
+        >
           <div class="row items-center justify-between q-mb-md">
             <div>
-              <div class="text-h6 text-weight-medium">{{ selectedTable.name }}</div>
-              <div v-if="selectedTable.description" class="text-caption text-grey-6">
+              <div class="text-h6 text-weight-medium">
+                {{ selectedTable.name }}
+              </div>
+              <div
+                v-if="selectedTable.description"
+                class="text-caption text-grey-6"
+              >
                 {{ t('collectors.dataStructure.description') }}: {{ selectedTable.description }}
               </div>
             </div>
             <div class="row q-gutter-sm">
-              <q-btn flat dense color="primary" icon="edit" :label="t('common.edit')" @click="openEditTable(selectedTable)" />
-              <q-btn flat dense color="negative" icon="delete" :label="t('common.delete')" @click="deleteTable(selectedTable.id)" />
+              <q-btn
+                flat
+                dense
+                color="primary"
+                icon="edit"
+                :label="t('common.edit')"
+                @click="openEditTable(selectedTable)"
+              />
+              <q-btn
+                flat
+                dense
+                color="negative"
+                icon="delete"
+                :label="t('common.delete')"
+                @click="deleteTable(selectedTable.id)"
+              />
             </div>
           </div>
 
-          <div v-if="validationMessage" class="q-mb-md db-status-banner">
+          <div
+            v-if="validationMessage"
+            class="q-mb-md db-status-banner"
+          >
             {{ validationMessage }}
           </div>
 
           <div class="row q-col-gutter-sm q-mb-md">
-            <q-btn outline color="primary" :label="t('collectors.dataStructure.validate')" icon="verified" @click="validateStructure" />
-            <q-btn outline color="secondary" :label="t('collectors.dataStructure.preview')" icon="preview" @click="previewChanges" />
-            <q-btn color="secondary" :label="t('collectors.dataStructure.apply')" icon="done_all" @click="applyChanges" />
+            <q-btn
+              outline
+              color="primary"
+              :label="t('collectors.dataStructure.validate')"
+              icon="verified"
+              @click="validateStructure"
+            />
+            <q-btn
+              outline
+              color="secondary"
+              :label="t('collectors.dataStructure.preview')"
+              icon="preview"
+              @click="previewChanges"
+            />
+            <q-btn
+              color="secondary"
+              :label="t('collectors.dataStructure.apply')"
+              icon="done_all"
+              @click="applyChanges"
+            />
           </div>
 
-          <q-tabs v-model="activeDetailTab" inline-label class="db-tabs">
-            <q-tab name="structure" :label="t('collectors.dataStructure.structureTab')" />
-            <q-tab name="indexes" :label="t('collectors.dataStructure.indexesTab')" />
+          <q-tabs
+            v-model="activeDetailTab"
+            inline-label
+            class="db-tabs"
+          >
+            <q-tab
+              name="structure"
+              :label="t('collectors.dataStructure.structureTab')"
+            />
+            <q-tab
+              name="indexes"
+              :label="t('collectors.dataStructure.indexesTab')"
+            />
           </q-tabs>
 
-          <q-tab-panels v-model="activeDetailTab" animated class="bg-transparent">
-            <q-tab-panel name="structure" class="q-pa-none">
+          <q-tab-panels
+            v-model="activeDetailTab"
+            animated
+            class="bg-transparent"
+          >
+            <q-tab-panel
+              name="structure"
+              class="q-pa-none"
+            >
               <div class="row items-center justify-between q-mb-sm">
-                <div class="text-subtitle2 text-weight-medium">{{ t('collectors.dataStructure.columns') }}</div>
-                <q-btn size="sm" color="primary" icon="add" :label="t('collectors.dataStructure.actions.addField')" @click="openCreateField(selectedTable.id)" />
+                <div class="text-subtitle2 text-weight-medium">
+                  {{ t('collectors.dataStructure.columns') }}
+                </div>
+                <q-btn
+                  size="sm"
+                  color="primary"
+                  icon="add"
+                  :label="t('collectors.dataStructure.actions.addField')"
+                  @click="openCreateField(selectedTable.id)"
+                />
               </div>
 
-              <q-table flat bordered :rows="selectedTable.fields.map((field, index) => ({ ...field, position: index + 1 }))" :columns="fieldColumns" row-key="id" class="db-table">
-                <template #body-cell-name="props">
-                  <q-td :props="props">
-                    <span class="text-weight-medium">{{ props.value }}</span>
+              <q-table
+                flat
+                bordered
+                :rows="selectedTable.fields.map((field, index) => ({ ...field, position: index + 1 }))"
+                :columns="fieldColumns"
+                row-key="id"
+                class="db-table"
+              >
+                <template #body-cell-name="cellProps">
+                  <q-td :props="cellProps">
+                    <span class="text-weight-medium">{{ cellProps.value }}</span>
                   </q-td>
                 </template>
-                <template #body-cell-type="props">
-                  <q-td :props="props">
-                    {{ formatType(props.value) }}
+                <template #body-cell-type="cellProps">
+                  <q-td :props="cellProps">
+                    {{ formatType(cellProps.value) }}
                   </q-td>
                 </template>
-                <template #body-cell-nullable="props">
-                  <q-td :props="props">
-                    {{ props.value ? '✓' : '—' }}
+                <template #body-cell-nullable="cellProps">
+                  <q-td :props="cellProps">
+                    {{ cellProps.value ? '✓' : '—' }}
                   </q-td>
                 </template>
-                <template #body-cell-primaryKey="props">
-                  <q-td :props="props">
-                    {{ props.value ? '✓' : '—' }}
+                <template #body-cell-primaryKey="cellProps">
+                  <q-td :props="cellProps">
+                    {{ cellProps.value ? '✓' : '—' }}
                   </q-td>
                 </template>
-                <template #body-cell-actions="props">
-                  <q-td :props="props">
+                <template #body-cell-actions="cellProps">
+                  <q-td :props="cellProps">
                     <div class="row q-gutter-xs">
-                      <q-btn flat round dense icon="edit" size="sm" color="primary" @click="openEditField(selectedTable.id, props.row)" />
-                      <q-btn flat round dense icon="delete" size="sm" color="negative" @click="deleteField(selectedTable.id, props.row.id)" />
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="edit"
+                        size="sm"
+                        color="primary"
+                        @click="openEditField(selectedTable.id, cellProps.row)"
+                      />
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="delete"
+                        size="sm"
+                        color="negative"
+                        @click="deleteField(selectedTable.id, cellProps.row.id)"
+                      />
                     </div>
                   </q-td>
                 </template>
               </q-table>
             </q-tab-panel>
 
-            <q-tab-panel name="indexes" class="q-pa-none">
+            <q-tab-panel
+              name="indexes"
+              class="q-pa-none"
+            >
               <div class="row items-center justify-between q-mb-sm">
-                <div class="text-subtitle2 text-weight-medium">{{ t('collectors.dataStructure.indexes') }}</div>
-                <q-btn size="sm" color="primary" icon="add" :label="t('collectors.dataStructure.actions.addIndex')" @click="openCreateIndex(selectedTable.id)" />
+                <div class="text-subtitle2 text-weight-medium">
+                  {{ t('collectors.dataStructure.indexes') }}
+                </div>
+                <q-btn
+                  size="sm"
+                  color="primary"
+                  icon="add"
+                  :label="t('collectors.dataStructure.actions.addIndex')"
+                  @click="openCreateIndex(selectedTable.id)"
+                />
               </div>
 
-              <q-table flat bordered :rows="selectedTable.indexes" :columns="indexColumns" row-key="id" class="db-table">
-                <template #body-cell-columns="props">
-                  <q-td :props="props">
-                    {{ props.value.join(', ') || '—' }}
+              <q-table
+                flat
+                bordered
+                :rows="selectedTable.indexes"
+                :columns="indexColumns"
+                row-key="id"
+                class="db-table"
+              >
+                <template #body-cell-columns="cellProps">
+                  <q-td :props="cellProps">
+                    {{ cellProps.value.join(', ') || '—' }}
                   </q-td>
                 </template>
-                <template #body-cell-actions="props">
-                  <q-td :props="props">
+                <template #body-cell-actions="cellProps">
+                  <q-td :props="cellProps">
                     <div class="row q-gutter-xs">
-                      <q-btn flat round dense icon="edit" size="sm" color="primary" @click="openEditIndex(selectedTable.id, props.row)" />
-                      <q-btn flat round dense icon="delete" size="sm" color="negative" @click="deleteIndex(selectedTable.id, props.row.id)" />
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="edit"
+                        size="sm"
+                        color="primary"
+                        @click="openEditIndex(selectedTable.id, cellProps.row)"
+                      />
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="delete"
+                        size="sm"
+                        color="negative"
+                        @click="deleteIndex(selectedTable.id, cellProps.row.id)"
+                      />
                     </div>
                   </q-td>
                 </template>
@@ -156,9 +315,24 @@
       </template>
     </q-splitter>
 
-    <CollectorTableFormDialog v-model="tableDialogOpen" :table="editingTable" :duplicate-names="tableNames" @save="handleTableSave" />
-    <CollectorFieldFormDialog v-model="fieldDialogOpen" :field="editingField" :existing-names="currentTableFields" @save="handleFieldSave" />
-    <CollectorIndexFormDialog v-model="indexDialogOpen" :index="editingIndex" :field-options="currentTableFieldNames" @save="handleIndexSave" />
+    <CollectorTableFormDialog
+      v-model="tableDialogOpen"
+      :table="editingTable"
+      :duplicate-names="tableNames"
+      @save="handleTableSave"
+    />
+    <CollectorFieldFormDialog
+      v-model="fieldDialogOpen"
+      :field="editingField"
+      :existing-names="currentTableFields"
+      @save="handleFieldSave"
+    />
+    <CollectorIndexFormDialog
+      v-model="indexDialogOpen"
+      :index="editingIndex"
+      :field-options="currentTableFieldNames"
+      @save="handleIndexSave"
+    />
   </div>
 </template>
 

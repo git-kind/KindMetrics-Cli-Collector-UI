@@ -1,14 +1,31 @@
 <template>
   <div class="create-company-form">
-    <div class="text-h5 q-mb-md">{{ t('companyContext.createTitle') }}</div>
+    <div class="text-h5 q-mb-md">
+      {{ t('companyContext.createTitle') }}
+    </div>
     <div>
-      <q-form class="q-gutter-md" @submit.prevent="createCompany">
-        <CompanyFieldsComponent :model-value="form" @update:model-value="Object.assign(form, $event)" />
-        <q-banner v-if="errorKey" rounded class="form-error">
+      <q-form
+        class="q-gutter-md"
+        @submit.prevent="createCompany"
+      >
+        <CompanyFieldsComponent
+          :model-value="form"
+          @update:model-value="Object.assign(form, $event)"
+        />
+        <q-banner
+          v-if="errorKey"
+          rounded
+          class="form-error"
+        >
           {{ t(errorKey) }}
         </q-banner>
         <div class="row justify-end q-gutter-sm">
-          <q-btn flat :label="t('common.cancel')" type="button" @click="emit('cancel')" />
+          <q-btn
+            flat
+            :label="t('common.cancel')"
+            type="button"
+            @click="emit('cancel')"
+          />
           <q-btn
             color="primary"
             unelevated

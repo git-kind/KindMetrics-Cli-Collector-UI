@@ -1,7 +1,12 @@
 <template>
   <div>
-    <div class="text-h5 q-mb-lg">{{ t(titleKey) }}</div>
-    <MockTableComponent :rows="rows" :columns="columns" />
+    <div class="text-h5 q-mb-lg">
+      {{ t(titleKey) }}
+    </div>
+    <MockTableComponent
+      :rows="rows"
+      :columns="columns"
+    />
   </div>
 </template>
 

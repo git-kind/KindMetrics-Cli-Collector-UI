@@ -1,5 +1,8 @@
 <template>
-  <q-footer elevated class="login-footer">
+  <q-footer
+    elevated
+    class="login-footer"
+  >
     <q-toolbar>
       <q-toolbar-title class="text-caption">
         © 2026 Kind Technologies · Acceso protegido

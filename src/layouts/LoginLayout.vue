@@ -1,5 +1,8 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="login-layout">
+  <q-layout
+    view="lHh Lpr lFf"
+    class="login-layout"
+  >
     <q-page-container>
       <q-page class="login-layout-page">
         <div class="login-layout-container">
@@ -7,7 +10,6 @@
         </div>
       </q-page>
     </q-page-container>
-
   </q-layout>
 </template>
 

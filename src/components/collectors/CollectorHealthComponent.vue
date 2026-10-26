@@ -1,19 +1,38 @@
 <template>
   <div class="q-gutter-md">
-    <q-banner rounded class="bg-blue-grey-1 text-blue-grey-10">
-      <template #avatar><q-icon name="info" color="primary" /></template>
+    <q-banner
+      rounded
+      class="bg-blue-grey-1 text-blue-grey-10"
+    >
+      <template #avatar>
+        <q-icon
+          name="info"
+          color="primary"
+        />
+      </template>
       {{ t('collectors.health.mockNotice') }}
     </q-banner>
-    <q-list bordered separator class="rounded-borders">
-      <q-item v-for="item in healthItems" :key="item.label">
+    <q-list
+      bordered
+      separator
+      class="rounded-borders"
+    >
+      <q-item
+        v-for="item in healthItems"
+        :key="item.label"
+      >
         <q-item-section>
-          <q-item-label caption>{{ t(item.label) }}</q-item-label>
+          <q-item-label caption>
+            {{ t(item.label) }}
+          </q-item-label>
           <q-item-label>{{ item.value }}</q-item-label>
         </q-item-section>
       </q-item>
       <q-item>
         <q-item-section>
-          <q-item-label caption>{{ t('collectors.health.lastError') }}</q-item-label>
+          <q-item-label caption>
+            {{ t('collectors.health.lastError') }}
+          </q-item-label>
           <q-item-label>{{ health.lastErrorKey ? t(health.lastErrorKey) : t('common.none') }}</q-item-label>
         </q-item-section>
       </q-item>

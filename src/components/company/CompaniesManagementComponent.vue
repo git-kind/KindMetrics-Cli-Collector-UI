@@ -3,24 +3,52 @@
     <section class="companies-content">
       <div class="row items-center justify-between q-col-gutter-md q-mb-lg">
         <div class="col">
-          <h1 class="text-h5 q-my-none">{{ t('menu.companies') }}</h1>
-          <div class="text-body2 text-grey-7 q-mt-xs">{{ t('companyContext.managementDescription') }}</div>
+          <h1 class="text-h5 q-my-none">
+            {{ t('menu.companies') }}
+          </h1>
+          <div class="text-body2 text-grey-7 q-mt-xs">
+            {{ t('companyContext.managementDescription') }}
+          </div>
         </div>
         <div class="col-auto">
-          <q-btn color="primary" unelevated icon="add" :label="t('companyContext.createAction')" @click="openCreate" />
+          <q-btn
+            color="primary"
+            unelevated
+            icon="add"
+            :label="t('companyContext.createAction')"
+            @click="openCreate"
+          />
         </div>
       </div>
 
       <div class="row items-center q-mb-md">
-        <q-input v-model="filter" dense outlined clearable :placeholder="t('common.search')" class="company-search">
-          <template #prepend><q-icon name="search" /></template>
+        <q-input
+          v-model="filter"
+          dense
+          outlined
+          clearable
+          :placeholder="t('common.search')"
+          class="company-search"
+        >
+          <template #prepend>
+            <q-icon name="search" />
+          </template>
         </q-input>
       </div>
 
-      <q-banner v-if="loadFailed" class="q-mb-md bg-red-1 text-negative" rounded>
+      <q-banner
+        v-if="loadFailed"
+        class="q-mb-md bg-red-1 text-negative"
+        rounded
+      >
         {{ loadError || t('companyContext.loadError') }}
         <template #action>
-          <q-btn flat color="negative" :label="t('common.retry')" @click="loadCompanies" />
+          <q-btn
+            flat
+            color="negative"
+            :label="t('common.retry')"
+            @click="loadCompanies"
+          />
         </template>
       </q-banner>
 
@@ -42,8 +70,18 @@
           </q-td>
         </template>
         <template #body-cell-actions="slotProps">
-          <q-td :props="slotProps" class="text-right">
-            <q-btn flat round dense icon="edit" :aria-label="t('common.edit')" @click="openEdit(slotProps.row)">
+          <q-td
+            :props="slotProps"
+            class="text-right"
+          >
+            <q-btn
+              flat
+              round
+              dense
+              icon="edit"
+              :aria-label="t('common.edit')"
+              @click="openEdit(slotProps.row)"
+            >
               <q-tooltip>{{ t('common.edit') }}</q-tooltip>
             </q-btn>
             <q-btn
@@ -75,12 +113,20 @@
       </q-table>
     </section>
 
-    <q-dialog v-model="formDialog" persistent>
+    <q-dialog
+      v-model="formDialog"
+      persistent
+    >
       <q-card class="company-form-dialog">
         <q-card-section>
-          <div class="text-h6">{{ editingCompany ? t('companyContext.editTitle') : t('companyContext.createTitle') }}</div>
+          <div class="text-h6">
+            {{ editingCompany ? t('companyContext.editTitle') : t('companyContext.createTitle') }}
+          </div>
         </q-card-section>
-        <q-form class="q-gutter-md" @submit.prevent="saveCompany">
+        <q-form
+          class="q-gutter-md"
+          @submit.prevent="saveCompany"
+        >
           <q-card-section class="q-pt-none">
             <CompanyFieldsComponent
               :model-value="form"
@@ -88,27 +134,62 @@
               :status-options="statusOptions"
               @update:model-value="Object.assign(form, $event)"
             />
-            <q-banner v-if="formError" rounded class="bg-red-1 text-negative q-mt-md">
+            <q-banner
+              v-if="formError"
+              rounded
+              class="bg-red-1 text-negative q-mt-md"
+            >
               {{ t(formError) }}
             </q-banner>
           </q-card-section>
-          <q-card-actions align="right" class="q-px-md q-pb-md">
-            <q-btn flat :label="t('common.cancel')" :disable="saving" @click="formDialog = false" />
-            <q-btn color="primary" unelevated type="submit" :loading="saving" :label="t('common.save')" />
+          <q-card-actions
+            align="right"
+            class="q-px-md q-pb-md"
+          >
+            <q-btn
+              flat
+              :label="t('common.cancel')"
+              :disable="saving"
+              @click="formDialog = false"
+            />
+            <q-btn
+              color="primary"
+              unelevated
+              type="submit"
+              :loading="saving"
+              :label="t('common.save')"
+            />
           </q-card-actions>
         </q-form>
       </q-card>
     </q-dialog>
 
-    <q-dialog :model-value="companyToDelete !== null" @update:model-value="value => { if (!value) companyToDelete = null }">
+    <q-dialog
+      :model-value="companyToDelete !== null"
+      @update:model-value="value => { if (!value) companyToDelete = null }"
+    >
       <q-card class="delete-dialog">
         <q-card-section>
-          <div class="text-h6">{{ t('companyContext.deleteTitle') }}</div>
-          <div class="q-mt-sm">{{ t('companyContext.deleteMessage', { name: companyToDelete?.name ?? '' }) }}</div>
+          <div class="text-h6">
+            {{ t('companyContext.deleteTitle') }}
+          </div>
+          <div class="q-mt-sm">
+            {{ t('companyContext.deleteMessage', { name: companyToDelete?.name ?? '' }) }}
+          </div>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat :label="t('common.cancel')" @click="companyToDelete = null" />
-          <q-btn color="negative" unelevated :loading="deleting" :label="t('common.delete')" @click="deleteCompany" />
+          <q-btn
+            flat
+            :label="t('common.cancel')"
+            @click="companyToDelete = null"
+          />
+          <q-btn
+            color="negative"
+            unelevated
+            :loading="deleting"
+            :label="t('common.delete')"
+            @click="deleteCompany"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>

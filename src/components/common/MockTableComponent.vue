@@ -1,5 +1,8 @@
 <template>
-  <q-card flat class="km-card">
+  <q-card
+    flat
+    class="km-card"
+  >
     <q-table
       flat
       bordered
@@ -8,9 +11,12 @@
       row-key="id"
       :pagination="{ rowsPerPage: 10 }"
     >
-      <template #body-cell-status="props">
-        <q-td :props="props">
-          <q-badge :color="statusColor(props.value)" :label="statusLabel(props.value)" />
+      <template #body-cell-status="cellProps">
+        <q-td :props="cellProps">
+          <q-badge
+            :color="statusColor(cellProps.value)"
+            :label="statusLabel(cellProps.value)"
+          />
         </q-td>
       </template>
     </q-table>

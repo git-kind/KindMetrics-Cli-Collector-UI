@@ -1,10 +1,22 @@
 <template>
-  <q-card flat bordered class="entry-card">
+  <q-card
+    flat
+    bordered
+    class="entry-card"
+  >
     <header class="entry-brand">
-      <img :src="kindLogo" alt="Kind Technologies" class="entry-logo" />
+      <img
+        :src="kindLogo"
+        alt="Kind Technologies"
+        class="entry-logo"
+      >
       <div>
-        <div class="text-subtitle1 text-weight-bold">Kind Technologies</div>
-        <div class="text-caption km-muted">{{ t('app.title') }}</div>
+        <div class="text-subtitle1 text-weight-bold">
+          Kind Technologies
+        </div>
+        <div class="text-caption km-muted">
+          {{ t('app.title') }}
+        </div>
       </div>
     </header>
 

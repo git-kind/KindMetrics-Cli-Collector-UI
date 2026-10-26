@@ -2,10 +2,17 @@
   <div>
     <div class="row items-center q-col-gutter-md q-mb-lg">
       <div class="col">
-        <div class="text-h5 text-weight-bold">{{ t('collectors.title') }}</div>
-        <div class="km-muted">{{ t('collectors.subtitle') }}</div>
+        <div class="text-h5 text-weight-bold">
+          {{ t('collectors.title') }}
+        </div>
+        <div class="km-muted">
+          {{ t('collectors.subtitle') }}
+        </div>
       </div>
-      <div v-if="can('collector.create')" class="col-auto">
+      <div
+        v-if="can('collector.create')"
+        class="col-auto"
+      >
         <q-btn
           color="primary"
           unelevated
@@ -17,19 +24,38 @@
       </div>
     </div>
 
-    <q-banner v-if="pageError" rounded class="bg-negative text-white q-mb-md">
-      <template #avatar><q-icon name="error" /></template>
+    <q-banner
+      v-if="pageError"
+      rounded
+      class="bg-negative text-white q-mb-md"
+    >
+      <template #avatar>
+        <q-icon name="error" />
+      </template>
       {{ t(pageErrorMessage) }}
       <template #action>
-        <q-btn flat color="white" :label="t('common.retry')" @click="loadPage" />
+        <q-btn
+          flat
+          color="white"
+          :label="t('common.retry')"
+          @click="loadPage"
+        />
       </template>
     </q-banner>
 
-    <q-banner v-if="!can('collector.view')" rounded class="bg-warning text-dark q-mb-md">
+    <q-banner
+      v-if="!can('collector.view')"
+      rounded
+      class="bg-warning text-dark q-mb-md"
+    >
       {{ t('common.accessDenied') }}
     </q-banner>
 
-    <CollectorFiltersComponent v-if="can('collector.view')" v-model="filters" class="q-mb-md" />
+    <CollectorFiltersComponent
+      v-if="can('collector.view')"
+      v-model="filters"
+      class="q-mb-md"
+    />
 
     <q-table
       v-if="can('collector.view')"
@@ -43,13 +69,19 @@
       :no-data-label="t('collectors.empty.filtered')"
     >
       <template #body-cell-equipmentId="slotProps">
-        <q-td :props="slotProps">{{ referenceName('equipment', slotProps.value) }}</q-td>
+        <q-td :props="slotProps">
+          {{ referenceName('equipment', slotProps.value) }}
+        </q-td>
       </template>
       <template #body-cell-extractionMethodIds="slotProps">
-        <q-td :props="slotProps">{{ extractionMethodNames(slotProps.value) }}</q-td>
+        <q-td :props="slotProps">
+          {{ extractionMethodNames(slotProps.value) }}
+        </q-td>
       </template>
       <template #body-cell-originVersionId="slotProps">
-        <q-td :props="slotProps">{{ referenceName('originVersions', slotProps.value) }}</q-td>
+        <q-td :props="slotProps">
+          {{ referenceName('originVersions', slotProps.value) }}
+        </q-td>
       </template>
       <template #body-cell-status="slotProps">
         <q-td :props="slotProps">
@@ -66,20 +98,45 @@
             :color="executionStatusColor(slotProps.value)"
             :label="t(`collectors.executionStatus.${String(slotProps.value).toLowerCase()}`)"
           />
-          <span v-else class="km-muted">{{ t('common.notAvailable') }}</span>
+          <span
+            v-else
+            class="km-muted"
+          >{{ t('common.notAvailable') }}</span>
         </q-td>
       </template>
       <template #body-cell-actions="slotProps">
-        <q-td :props="slotProps" class="text-right">
-          <q-btn v-if="can('collector.view')" flat round dense icon="visibility" :aria-label="t('collectors.actions.view')" @click="viewCollector(slotProps.row)">
+        <q-td
+          :props="slotProps"
+          class="text-right"
+        >
+          <q-btn
+            v-if="can('collector.view')"
+            flat
+            round
+            dense
+            icon="visibility"
+            :aria-label="t('collectors.actions.view')"
+            @click="viewCollector(slotProps.row)"
+          >
             <q-tooltip>{{ t('collectors.actions.view') }}</q-tooltip>
           </q-btn>
-          <q-btn v-if="can('collector.edit')" flat round dense icon="edit" :aria-label="t('common.edit')" @click="openEditDialog(slotProps.row)">
+          <q-btn
+            v-if="can('collector.edit')"
+            flat
+            round
+            dense
+            icon="edit"
+            :aria-label="t('common.edit')"
+            @click="openEditDialog(slotProps.row)"
+          >
             <q-tooltip>{{ t('common.edit') }}</q-tooltip>
           </q-btn>
           <q-btn
             v-if="slotProps.row.status === 'INACTIVE' && can('collector.edit')"
-            flat round dense icon="play_arrow"
+            flat
+            round
+            dense
+            icon="play_arrow"
             :aria-label="t('collectors.actions.activate')"
             @click="confirmStatusChange(slotProps.row)"
           >
@@ -87,20 +144,35 @@
           </q-btn>
           <q-btn
             v-else-if="slotProps.row.status === 'ACTIVE' && can('collector.edit')"
-            flat round dense icon="pause"
+            flat
+            round
+            dense
+            icon="pause"
             :aria-label="t('collectors.actions.deactivate')"
             @click="confirmStatusChange(slotProps.row)"
           >
             <q-tooltip>{{ t('collectors.actions.deactivate') }}</q-tooltip>
           </q-btn>
-          <q-btn v-if="can('collector.delete')" flat round dense color="negative" icon="delete" :aria-label="t('common.delete')" @click="confirmDelete(slotProps.row)">
+          <q-btn
+            v-if="can('collector.delete')"
+            flat
+            round
+            dense
+            color="negative"
+            icon="delete"
+            :aria-label="t('common.delete')"
+            @click="confirmDelete(slotProps.row)"
+          >
             <q-tooltip>{{ t('common.delete') }}</q-tooltip>
           </q-btn>
         </q-td>
       </template>
       <template #no-data>
         <div class="full-width row flex-center text-grey-7 q-gutter-sm q-pa-lg">
-          <q-icon name="inbox" size="sm" />
+          <q-icon
+            name="inbox"
+            size="sm"
+          />
           <span>{{ filters.search || filters.status !== 'ALL' ? t('collectors.empty.filtered') : t('collectors.empty.list') }}</span>
         </div>
       </template>
@@ -213,7 +285,7 @@ function extractionMethodNames(value: unknown): string {
   if (!Array.isArray(value)) return t('common.notAvailable');
   return extractionMethods.value
     .filter((method) => value.includes(method.id))
-    .map((method) => `${t(`extractionMethods.types.${method.type}`)} - ${method.name}`)
+    .map((method) => `${method.protocol} - ${method.name}`)
     .join(', ') || t('common.notAvailable');
 }
 

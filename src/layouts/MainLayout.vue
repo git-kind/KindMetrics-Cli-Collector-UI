@@ -11,80 +11,37 @@
       }"
     >
       <q-toolbar>
-        <q-btn class="km-header-leading-btn" flat dense round icon="menu" @click="mini = !mini" />
-        <img v-if="company" :src="company.logo" alt="KindMetrics" class="km-logo" />
+        <q-btn
+          class="km-header-leading-btn"
+          flat
+          dense
+          round
+          icon="menu"
+          @click="mini = !mini"
+        />
+        <img
+          v-if="company"
+          :src="company.logo"
+          alt="KindMetrics"
+          class="km-logo"
+        >
         <div class="km-brand">
-          <div class="km-brand-title">{{ t('app.title') }}</div>
-          <div class="text-caption km-muted">{{ t('app.subtitle') }}</div>
+          <div class="km-brand-title">
+            {{ t('app.title') }}
+          </div>
+          <div class="text-caption km-muted">
+            {{ t('app.subtitle') }}
+          </div>
         </div>
         <q-space />
         <div class="km-header-actions">
-        <q-btn
-          class="km-company-context"
-          flat
-          no-caps
-          :label="company ? `${t('companyContext.currentlyManaging')}: ${company.name}` : t('companyContext.noneSelected')"
-          icon="business"
-        >
-            <q-menu
-              dark
-              content-class="km-header-menu"
-              :content-style="{
-                backgroundColor: currentSkin.surface,
-                color: currentSkin.text,
-                border: `1px solid ${currentSkin.border}`,
-              }"
-            >
-            <q-list style="min-width: 180px">
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>{{ t('common.company') }}</q-item-label>
-                  <q-item-label>{{ company?.name ?? '' }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <template v-if="installationMode === 'KIND'">
-                <q-separator />
-                <q-item v-close-popup clickable :to="{ name: 'company-select' }">
-                  <q-item-section>{{ t('companyContext.switchCompany') }}</q-item-section>
-                </q-item>
-              </template>
-            </q-list>
-          </q-menu>
-        </q-btn>
-        <q-btn flat dense :label="locale.toUpperCase()">
-          <q-menu
-            dark
-            content-class="km-language-menu"
-            :content-style="{
-              backgroundColor: currentSkin.surface,
-              color: currentSkin.text,
-              border: `1px solid ${currentSkin.border}`,
-            }"
+          <q-btn
+            class="km-company-context"
+            flat
+            no-caps
+            :label="company ? `${t('companyContext.currentlyManaging')}: ${company.name}` : t('companyContext.noneSelected')"
+            icon="business"
           >
-            <q-list
-              class="km-language-list"
-              :style="{ backgroundColor: currentSkin.surface, color: currentSkin.text }"
-            >
-              <q-item
-                v-close-popup
-                clickable
-                :style="{ color: currentSkin.text }"
-                @click="setLanguage('es')"
-              >
-                <q-item-section>Español</q-item-section>
-              </q-item>
-              <q-item
-                v-close-popup
-                clickable
-                :style="{ color: currentSkin.text }"
-                @click="setLanguage('en')"
-              >
-                <q-item-section>English</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-        <q-btn flat dense round icon="palette">
             <q-menu
               dark
               content-class="km-header-menu"
@@ -94,21 +51,71 @@
                 border: `1px solid ${currentSkin.border}`,
               }"
             >
-            <q-list>
-              <q-item
-                v-for="skinOption in skinOptions"
-                :key="skinOption.id"
-                v-close-popup
-                clickable
-                @click="applySkin(skinOption.id)"
+              <q-list style="min-width: 180px">
+                <q-item>
+                  <q-item-section>
+                    <q-item-label caption>
+                      {{ t('common.company') }}
+                    </q-item-label>
+                    <q-item-label>{{ company?.name ?? '' }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <template v-if="installationMode === 'KIND'">
+                  <q-separator />
+                  <q-item
+                    v-close-popup
+                    clickable
+                    :to="{ name: 'company-select' }"
+                  >
+                    <q-item-section>{{ t('companyContext.switchCompany') }}</q-item-section>
+                  </q-item>
+                </template>
+              </q-list>
+            </q-menu>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            :label="locale.toUpperCase()"
+          >
+            <q-menu
+              dark
+              content-class="km-language-menu"
+              :content-style="{
+                backgroundColor: currentSkin.surface,
+                color: currentSkin.text,
+                border: `1px solid ${currentSkin.border}`,
+              }"
+            >
+              <q-list
+                class="km-language-list"
+                :style="{ backgroundColor: currentSkin.surface, color: currentSkin.text }"
               >
-                <q-item-section>{{ t(skinOption.nameKey) }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-        <q-btn flat dense round icon="settings" :to="{ name: 'settings' }" />
-        <q-btn flat dense round icon="account_circle">
+                <q-item
+                  v-close-popup
+                  clickable
+                  :style="{ color: currentSkin.text }"
+                  @click="setLanguage('es')"
+                >
+                  <q-item-section>Español</q-item-section>
+                </q-item>
+                <q-item
+                  v-close-popup
+                  clickable
+                  :style="{ color: currentSkin.text }"
+                  @click="setLanguage('en')"
+                >
+                  <q-item-section>English</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            round
+            icon="palette"
+          >
             <q-menu
               dark
               content-class="km-header-menu"
@@ -118,17 +125,56 @@
                 border: `1px solid ${currentSkin.border}`,
               }"
             >
-            <q-list>
-              <q-item>
-                <q-item-section>{{ username }}</q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item v-close-popup clickable @click="logout">
-                <q-item-section>{{ t('common.logout') }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+              <q-list>
+                <q-item
+                  v-for="skinOption in skinOptions"
+                  :key="skinOption.id"
+                  v-close-popup
+                  clickable
+                  @click="applySkin(skinOption.id)"
+                >
+                  <q-item-section>{{ t(skinOption.nameKey) }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            round
+            icon="settings"
+            :to="{ name: 'settings' }"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            icon="account_circle"
+          >
+            <q-menu
+              dark
+              content-class="km-header-menu"
+              :content-style="{
+                backgroundColor: currentSkin.surface,
+                color: currentSkin.text,
+                border: `1px solid ${currentSkin.border}`,
+              }"
+            >
+              <q-list>
+                <q-item>
+                  <q-item-section>{{ username }}</q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item
+                  v-close-popup
+                  clickable
+                  @click="logout"
+                >
+                  <q-item-section>{{ t('common.logout') }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </div>
       </q-toolbar>
     </q-header>
@@ -157,32 +203,65 @@
           <q-tooltip>{{ t('menu.dashboard') }}</q-tooltip>
         </q-item>
 
-        <q-item clickable :to="{ name: 'extraction-methods' }" active-class="km-active">
-          <q-item-section avatar><q-icon name="cable" /></q-item-section>
+        <q-item
+          clickable
+          :to="{ name: 'extraction-methods' }"
+          active-class="km-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="cable" />
+          </q-item-section>
           <q-item-section>{{ t('menu.extractionMethods') }}</q-item-section>
           <q-tooltip>{{ t('menu.extractionMethods') }}</q-tooltip>
         </q-item>
 
-        <q-item clickable :to="{ name: 'collectors' }" active-class="km-active">
-          <q-item-section avatar><q-icon name="sync_alt" /></q-item-section>
+        <q-item
+          clickable
+          :to="{ name: 'collectors' }"
+          active-class="km-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="sync_alt" />
+          </q-item-section>
           <q-item-section>{{ t('menu.collectors') }}</q-item-section>
           <q-tooltip>{{ t('menu.collectors') }}</q-tooltip>
         </q-item>
 
-        <q-item clickable :to="{ name: 'storage' }" active-class="km-active">
-          <q-item-section avatar><q-icon name="storage" /></q-item-section>
+        <q-item
+          clickable
+          :to="{ name: 'storage' }"
+          active-class="km-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="storage" />
+          </q-item-section>
           <q-item-section>{{ t('menu.storage') }}</q-item-section>
           <q-tooltip>{{ t('menu.storage') }}</q-tooltip>
         </q-item>
 
-        <q-item v-if="installationMode === 'KIND'" clickable :to="{ name: 'companies' }" active-class="km-active">
-          <q-item-section avatar><q-icon name="business" /></q-item-section>
+        <q-item
+          v-if="installationMode === 'KIND'"
+          clickable
+          :to="{ name: 'companies' }"
+          active-class="km-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="business" />
+          </q-item-section>
           <q-item-section>{{ t('menu.companies') }}</q-item-section>
           <q-tooltip>{{ t('menu.companies') }}</q-tooltip>
         </q-item>
 
-        <q-expansion-item icon="settings" :label="t('menu.configuration')">
-          <q-item clickable :to="{ name: 'settings' }" active-class="km-active" class="q-pl-xl">
+        <q-expansion-item
+          icon="settings"
+          :label="t('menu.configuration')"
+        >
+          <q-item
+            clickable
+            :to="{ name: 'settings' }"
+            active-class="km-active"
+            class="q-pl-xl"
+          >
             <q-item-section avatar>
               <q-icon name="settings" />
             </q-item-section>

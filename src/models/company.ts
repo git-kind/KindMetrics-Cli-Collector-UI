@@ -1,5 +1,21 @@
 export type CompanyStatus = 'ACTIVE' | 'INACTIVE';
 
+export interface CompanySessionDto {
+	code: string;
+	name: string;
+	shortName: string;
+	status: CompanyStatus;
+	logo: string;
+	timezone: string;
+	locale: 'es' | 'en';
+}
+
+export type ActiveCompany = Company | (CompanySessionDto & {
+	id?: never;
+	databaseName?: never;
+	configJson?: never;
+});
+
 export interface CompanyFormFields {
 	name: string;
 	shortName: string;

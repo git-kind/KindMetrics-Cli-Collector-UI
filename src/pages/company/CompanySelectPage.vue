@@ -1,6 +1,10 @@
 <template>
   <q-page class="company-page q-pa-lg">
-    <CompanySelectComponent @select="selectCompany" @create="goToCreate" @skip="skipSelection" />
+    <CompanySelectComponent
+      @select="selectCompany"
+      @create="goToCreate"
+      @skip="skipSelection"
+    />
   </q-page>
 </template>
 

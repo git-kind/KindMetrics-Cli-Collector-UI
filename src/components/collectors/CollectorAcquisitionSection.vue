@@ -1,16 +1,29 @@
 <template>
   <div class="data-acquisition-admin q-gutter-md">
-    <q-banner rounded class="bg-blue-grey-1 text-blue-grey-10">
+    <q-banner
+      rounded
+      class="bg-blue-grey-1 text-blue-grey-10"
+    >
       <template #avatar>
-        <q-icon name="info" color="primary" />
+        <q-icon
+          name="info"
+          color="primary"
+        />
       </template>
       {{ t('collectors.acquisition.mockNotice') }}
     </q-banner>
 
-    <q-splitter v-model="splitterModel" unit="px" style="height: 760px;" class="acquisition-splitter">
+    <q-splitter
+      v-model="splitterModel"
+      unit="px"
+      style="height: 760px;"
+      class="acquisition-splitter"
+    >
       <template #before>
         <div class="acquisition-sidebar">
-          <div class="text-subtitle2 text-weight-medium q-mb-md">{{ t('collectors.acquisition.dataListTitle') }}</div>
+          <div class="text-subtitle2 text-weight-medium q-mb-md">
+            {{ t('collectors.acquisition.dataListTitle') }}
+          </div>
 
           <q-input
             v-model="search"
@@ -25,7 +38,10 @@
             </template>
           </q-input>
 
-          <q-list bordered class="acquisition-list">
+          <q-list
+            bordered
+            class="acquisition-list"
+          >
             <q-item
               v-for="item in filteredItems"
               :key="item.id"
@@ -35,11 +51,19 @@
               @click="selectedItemId = item.id"
             >
               <q-item-section>
-                <q-item-label class="text-weight-medium">{{ item.name }}</q-item-label>
-                <q-item-label caption>{{ item.methodName }}</q-item-label>
+                <q-item-label class="text-weight-medium">
+                  {{ item.name }}
+                </q-item-label>
+                <q-item-label caption>
+                  {{ item.methodName }}
+                </q-item-label>
               </q-item-section>
               <q-item-section side>
-                <q-badge :color="statusColor(item.status)" text-color="white" :label="statusLabel(item.status)" />
+                <q-badge
+                  :color="statusColor(item.status)"
+                  text-color="white"
+                  :label="statusLabel(item.status)"
+                />
               </q-item-section>
             </q-item>
           </q-list>
@@ -55,37 +79,89 @@
       </template>
 
       <template #after>
-        <div v-if="selectedItem" class="acquisition-detail">
+        <div
+          v-if="selectedItem"
+          class="acquisition-detail"
+        >
           <div class="row items-center justify-between q-mb-md">
             <div>
-              <div class="text-h5 text-weight-medium">{{ selectedItem.name }}</div>
-              <div class="text-caption text-grey-6">{{ selectedItem.description || t('collectors.acquisition.noDescription') }}</div>
+              <div class="text-h5 text-weight-medium">
+                {{ selectedItem.name }}
+              </div>
+              <div class="text-caption text-grey-6">
+                {{ selectedItem.description || t('collectors.acquisition.noDescription') }}
+              </div>
             </div>
             <div class="row q-gutter-sm">
-              <q-btn flat dense color="primary" icon="edit" :label="t('common.edit')" @click="openEditDialog(selectedItem)" />
-              <q-btn flat dense color="negative" icon="delete" :label="t('common.delete')" @click="deleteSelectedItem" />
+              <q-btn
+                flat
+                dense
+                color="primary"
+                icon="edit"
+                :label="t('common.edit')"
+                @click="openEditDialog(selectedItem)"
+              />
+              <q-btn
+                flat
+                dense
+                color="negative"
+                icon="delete"
+                :label="t('common.delete')"
+                @click="deleteSelectedItem"
+              />
             </div>
           </div>
 
           <div class="info-grid q-mb-md">
             <div class="info-card">
-              <div class="text-caption text-grey-6">{{ t('collectors.acquisition.status') }}</div>
-              <div class="text-subtitle2">{{ statusLabel(selectedItem.status) }}</div>
+              <div class="text-caption text-grey-6">
+                {{ t('collectors.acquisition.status') }}
+              </div>
+              <div class="text-subtitle2">
+                {{ statusLabel(selectedItem.status) }}
+              </div>
             </div>
             <div class="info-card">
-              <div class="text-caption text-grey-6">{{ t('collectors.acquisition.method') }}</div>
-              <div class="text-subtitle2">{{ selectedItem.methodName }}</div>
+              <div class="text-caption text-grey-6">
+                {{ t('collectors.acquisition.method') }}
+              </div>
+              <div class="text-subtitle2">
+                {{ selectedItem.methodName }}
+              </div>
             </div>
           </div>
 
           <div class="row q-col-gutter-sm q-mb-md">
-            <q-btn outline color="primary" :label="t('collectors.acquisition.validateConfiguration')" icon="verified" @click="validateConfiguration" />
-            <q-btn outline color="secondary" :label="t('collectors.acquisition.testConnection')" icon="wifi_tethering" @click="runConnectionTest" />
-            <q-btn color="secondary" :label="t('collectors.acquisition.testExtraction')" icon="play_arrow" @click="runExtractionTest" />
+            <q-btn
+              outline
+              color="primary"
+              :label="t('collectors.acquisition.validateConfiguration')"
+              icon="verified"
+              @click="validateConfiguration"
+            />
+            <q-btn
+              outline
+              color="secondary"
+              :label="t('collectors.acquisition.testConnection')"
+              icon="wifi_tethering"
+              @click="runConnectionTest"
+            />
+            <q-btn
+              color="secondary"
+              :label="t('collectors.acquisition.testExtraction')"
+              icon="play_arrow"
+              @click="runExtractionTest"
+            />
           </div>
 
-          <q-card flat bordered class="rounded-borders q-mb-md">
-            <q-card-section class="text-subtitle2 text-weight-medium">{{ t('collectors.acquisition.configurationTitle') }}</q-card-section>
+          <q-card
+            flat
+            bordered
+            class="rounded-borders q-mb-md"
+          >
+            <q-card-section class="text-subtitle2 text-weight-medium">
+              {{ t('collectors.acquisition.configurationTitle') }}
+            </q-card-section>
             <q-separator />
             <q-card-section class="q-gutter-md">
               <div class="row q-col-gutter-md">
@@ -109,122 +185,465 @@
               </div>
 
               <div class="section-block">
-                <div class="section-title">{{ t('collectors.acquisition.connection') }}</div>
+                <div class="section-title">
+                  {{ t('collectors.acquisition.connection') }}
+                </div>
                 <div class="row q-col-gutter-md">
                   <template v-if="selectedItem.methodType === 'API'">
-                    <div class="col-12 col-md-6"><q-input :model-value="selectedItem.connection.url ?? ''" :label="t('collectors.acquisition.url')" @update:model-value="updateConnectionField('url', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-input :model-value="selectedItem.connection.port ?? 443" type="number" :label="t('collectors.acquisition.port')" @update:model-value="updateConnectionField('port', Number($event))" /></div>
-                    <div class="col-12 col-md-3"><q-input :model-value="selectedItem.connection.timeout ?? 30" type="number" :label="t('collectors.acquisition.timeout')" @update:model-value="updateConnectionField('timeout', Number($event))" /></div>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.connection.username ?? ''" :label="t('collectors.acquisition.username')" @update:model-value="updateConnectionField('username', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.connection.password ?? ''" type="password" :label="t('collectors.acquisition.password')" @update:model-value="updateConnectionField('password', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.connection.token ?? ''" :label="t('collectors.acquisition.token')" @update:model-value="updateConnectionField('token', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-select :model-value="selectedItem.connection.authentication ?? 'Bearer'" :options="authenticationOptions" :label="t('collectors.acquisition.authentication')" emit-value map-options @update:model-value="updateConnectionField('authentication', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-toggle :model-value="Boolean(selectedItem.connection.tls)" :label="t('collectors.acquisition.tls')" @update:model-value="updateConnectionField('tls', Boolean($event))" /></div>
+                    <div class="col-12 col-md-6">
+                      <q-input
+                        :model-value="selectedItem.connection.url ?? ''"
+                        :label="t('collectors.acquisition.url')"
+                        @update:model-value="updateConnectionField('url', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-input
+                        :model-value="selectedItem.connection.port ?? 443"
+                        type="number"
+                        :label="t('collectors.acquisition.port')"
+                        @update:model-value="updateConnectionField('port', Number($event))"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-input
+                        :model-value="selectedItem.connection.timeout ?? 30"
+                        type="number"
+                        :label="t('collectors.acquisition.timeout')"
+                        @update:model-value="updateConnectionField('timeout', Number($event))"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.connection.username ?? ''"
+                        :label="t('collectors.acquisition.username')"
+                        @update:model-value="updateConnectionField('username', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.connection.password ?? ''"
+                        type="password"
+                        :label="t('collectors.acquisition.password')"
+                        @update:model-value="updateConnectionField('password', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.connection.token ?? ''"
+                        :label="t('collectors.acquisition.token')"
+                        @update:model-value="updateConnectionField('token', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-select
+                        :model-value="selectedItem.connection.authentication ?? 'Bearer'"
+                        :options="authenticationOptions"
+                        :label="t('collectors.acquisition.authentication')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateConnectionField('authentication', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-toggle
+                        :model-value="Boolean(selectedItem.connection.tls)"
+                        :label="t('collectors.acquisition.tls')"
+                        @update:model-value="updateConnectionField('tls', Boolean($event))"
+                      />
+                    </div>
                   </template>
 
                   <template v-else-if="selectedItem.methodType === 'SNMP'">
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.connection.host ?? ''" :label="t('collectors.acquisition.host')" @update:model-value="updateConnectionField('host', $event as string)" /></div>
-                    <div class="col-12 col-md-2"><q-input :model-value="selectedItem.connection.port ?? 161" type="number" :label="t('collectors.acquisition.port')" @update:model-value="updateConnectionField('port', Number($event))" /></div>
-                    <div class="col-12 col-md-3"><q-select :model-value="selectedItem.connection.version ?? 'v2c'" :options="snmpVersions" :label="t('collectors.acquisition.version')" emit-value map-options @update:model-value="updateConnectionField('version', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-input :model-value="selectedItem.connection.community ?? ''" :label="t('collectors.acquisition.community')" @update:model-value="updateConnectionField('community', $event as string)" /></div>
-                    <div v-if="selectedItem.connection.version === 'v3'" class="col-12 col-md-3"><q-input :model-value="selectedItem.connection.username ?? ''" :label="t('collectors.acquisition.username')" @update:model-value="updateConnectionField('username', $event as string)" /></div>
-                    <div v-if="selectedItem.connection.version === 'v3'" class="col-12 col-md-3"><q-input :model-value="selectedItem.connection.authType ?? ''" :label="t('collectors.acquisition.authentication')" @update:model-value="updateConnectionField('authType', $event as string)" /></div>
-                    <div v-if="selectedItem.connection.version === 'v3'" class="col-12 col-md-3"><q-input :model-value="selectedItem.connection.privacy ?? ''" :label="t('collectors.acquisition.privacy')" @update:model-value="updateConnectionField('privacy', $event as string)" /></div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.connection.host ?? ''"
+                        :label="t('collectors.acquisition.host')"
+                        @update:model-value="updateConnectionField('host', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-2">
+                      <q-input
+                        :model-value="selectedItem.connection.port ?? 161"
+                        type="number"
+                        :label="t('collectors.acquisition.port')"
+                        @update:model-value="updateConnectionField('port', Number($event))"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-select
+                        :model-value="selectedItem.connection.version ?? 'v2c'"
+                        :options="snmpVersions"
+                        :label="t('collectors.acquisition.version')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateConnectionField('version', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-input
+                        :model-value="selectedItem.connection.community ?? ''"
+                        :label="t('collectors.acquisition.community')"
+                        @update:model-value="updateConnectionField('community', $event as string)"
+                      />
+                    </div>
+                    <div
+                      v-if="selectedItem.connection.version === 'v3'"
+                      class="col-12 col-md-3"
+                    >
+                      <q-input
+                        :model-value="selectedItem.connection.username ?? ''"
+                        :label="t('collectors.acquisition.username')"
+                        @update:model-value="updateConnectionField('username', $event as string)"
+                      />
+                    </div>
+                    <div
+                      v-if="selectedItem.connection.version === 'v3'"
+                      class="col-12 col-md-3"
+                    >
+                      <q-input
+                        :model-value="selectedItem.connection.authType ?? ''"
+                        :label="t('collectors.acquisition.authentication')"
+                        @update:model-value="updateConnectionField('authType', $event as string)"
+                      />
+                    </div>
+                    <div
+                      v-if="selectedItem.connection.version === 'v3'"
+                      class="col-12 col-md-3"
+                    >
+                      <q-input
+                        :model-value="selectedItem.connection.privacy ?? ''"
+                        :label="t('collectors.acquisition.privacy')"
+                        @update:model-value="updateConnectionField('privacy', $event as string)"
+                      />
+                    </div>
                   </template>
 
                   <template v-else-if="selectedItem.methodType === 'WEBHOOK'">
-                    <div class="col-12 col-md-6"><q-input :model-value="selectedItem.connection.url ?? ''" :label="t('collectors.acquisition.endpoint')" @update:model-value="updateConnectionField('url', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-select :model-value="selectedItem.connection.method ?? 'POST'" :options="httpMethods" :label="t('collectors.acquisition.httpMethod')" emit-value map-options @update:model-value="updateConnectionField('method', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-input :model-value="selectedItem.connection.timeout ?? 30" type="number" :label="t('collectors.acquisition.timeout')" @update:model-value="updateConnectionField('timeout', Number($event))" /></div>
-                    <div class="col-12"><q-input :model-value="(selectedItem.extraction.headers ?? []).join(', ')" :label="t('collectors.acquisition.headers')" @update:model-value="updateExtractionField('headers', ($event as string).split(',').map((entry) => entry.trim()).filter(Boolean))" /></div>
+                    <div class="col-12 col-md-6">
+                      <q-input
+                        :model-value="selectedItem.connection.url ?? ''"
+                        :label="t('collectors.acquisition.endpoint')"
+                        @update:model-value="updateConnectionField('url', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-select
+                        :model-value="selectedItem.connection.method ?? 'POST'"
+                        :options="httpMethods"
+                        :label="t('collectors.acquisition.httpMethod')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateConnectionField('method', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-input
+                        :model-value="selectedItem.connection.timeout ?? 30"
+                        type="number"
+                        :label="t('collectors.acquisition.timeout')"
+                        @update:model-value="updateConnectionField('timeout', Number($event))"
+                      />
+                    </div>
+                    <div class="col-12">
+                      <q-input
+                        :model-value="(selectedItem.extraction.headers ?? []).join(', ')"
+                        :label="t('collectors.acquisition.headers')"
+                        @update:model-value="updateExtractionField('headers', ($event as string).split(',').map((entry) => entry.trim()).filter(Boolean))"
+                      />
+                    </div>
                   </template>
 
                   <template v-else>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.connection.webhookUrl ?? ''" :label="t('collectors.acquisition.webhookUrl')" @update:model-value="updateConnectionField('webhookUrl', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.connection.tenantId ?? ''" :label="t('collectors.acquisition.tenantId')" @update:model-value="updateConnectionField('tenantId', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.connection.clientId ?? ''" :label="t('collectors.acquisition.clientId')" @update:model-value="updateConnectionField('clientId', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.connection.channel ?? ''" :label="t('collectors.acquisition.channel')" @update:model-value="updateConnectionField('channel', $event as string)" /></div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.connection.webhookUrl ?? ''"
+                        :label="t('collectors.acquisition.webhookUrl')"
+                        @update:model-value="updateConnectionField('webhookUrl', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.connection.tenantId ?? ''"
+                        :label="t('collectors.acquisition.tenantId')"
+                        @update:model-value="updateConnectionField('tenantId', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.connection.clientId ?? ''"
+                        :label="t('collectors.acquisition.clientId')"
+                        @update:model-value="updateConnectionField('clientId', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.connection.channel ?? ''"
+                        :label="t('collectors.acquisition.channel')"
+                        @update:model-value="updateConnectionField('channel', $event as string)"
+                      />
+                    </div>
                   </template>
                 </div>
               </div>
 
               <div class="section-block">
-                <div class="section-title">{{ t('collectors.acquisition.extraction') }}</div>
+                <div class="section-title">
+                  {{ t('collectors.acquisition.extraction') }}
+                </div>
                 <div class="row q-col-gutter-md">
                   <template v-if="selectedItem.methodType === 'API'">
-                    <div class="col-12 col-md-3"><q-select :model-value="selectedItem.extraction.httpMethod ?? 'GET'" :options="httpMethods" :label="t('collectors.acquisition.httpMethod')" emit-value map-options @update:model-value="updateExtractionField('httpMethod', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-input :model-value="selectedItem.extraction.endpoint ?? ''" :label="t('collectors.acquisition.endpoint')" @update:model-value="updateExtractionField('endpoint', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-input :model-value="(selectedItem.extraction.parameters ?? []).join(', ')" :label="t('collectors.acquisition.parameters')" @update:model-value="updateExtractionField('parameters', ($event as string).split(',').map((entry) => entry.trim()).filter(Boolean))" /></div>
-                    <div class="col-12 col-md-3"><q-select :model-value="selectedItem.extraction.responseFormat ?? 'JSON'" :options="responseFormats" :label="t('collectors.acquisition.format')" emit-value map-options @update:model-value="updateExtractionField('responseFormat', $event as string)" /></div>
-                    <div class="col-12 col-md-6"><q-input :model-value="selectedItem.extraction.jsonPath ?? ''" :label="t('collectors.acquisition.dataPath')" @update:model-value="updateExtractionField('jsonPath', $event as string)" /></div>
-                    <div class="col-12 col-md-6"><q-input :model-value="(selectedItem.extraction.headers ?? []).join(', ')" :label="t('collectors.acquisition.headers')" @update:model-value="updateExtractionField('headers', ($event as string).split(',').map((entry) => entry.trim()).filter(Boolean))" /></div>
+                    <div class="col-12 col-md-3">
+                      <q-select
+                        :model-value="selectedItem.extraction.httpMethod ?? 'GET'"
+                        :options="httpMethods"
+                        :label="t('collectors.acquisition.httpMethod')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateExtractionField('httpMethod', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-input
+                        :model-value="selectedItem.extraction.endpoint ?? ''"
+                        :label="t('collectors.acquisition.endpoint')"
+                        @update:model-value="updateExtractionField('endpoint', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-input
+                        :model-value="(selectedItem.extraction.parameters ?? []).join(', ')"
+                        :label="t('collectors.acquisition.parameters')"
+                        @update:model-value="updateExtractionField('parameters', ($event as string).split(',').map((entry) => entry.trim()).filter(Boolean))"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-select
+                        :model-value="selectedItem.extraction.responseFormat ?? 'JSON'"
+                        :options="responseFormats"
+                        :label="t('collectors.acquisition.format')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateExtractionField('responseFormat', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <q-input
+                        :model-value="selectedItem.extraction.jsonPath ?? ''"
+                        :label="t('collectors.acquisition.dataPath')"
+                        @update:model-value="updateExtractionField('jsonPath', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <q-input
+                        :model-value="(selectedItem.extraction.headers ?? []).join(', ')"
+                        :label="t('collectors.acquisition.headers')"
+                        @update:model-value="updateExtractionField('headers', ($event as string).split(',').map((entry) => entry.trim()).filter(Boolean))"
+                      />
+                    </div>
                   </template>
 
                   <template v-else-if="selectedItem.methodType === 'SNMP'">
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.extraction.oid ?? ''" :label="t('collectors.acquisition.oid')" @update:model-value="updateExtractionField('oid', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-select :model-value="selectedItem.extraction.type ?? 'INTEGER'" :options="snmpTypes" :label="t('collectors.acquisition.dataType')" emit-value map-options @update:model-value="updateExtractionField('type', $event as string)" /></div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.extraction.oid ?? ''"
+                        :label="t('collectors.acquisition.oid')"
+                        @update:model-value="updateExtractionField('oid', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-select
+                        :model-value="selectedItem.extraction.type ?? 'INTEGER'"
+                        :options="snmpTypes"
+                        :label="t('collectors.acquisition.dataType')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateExtractionField('type', $event as string)"
+                      />
+                    </div>
                   </template>
 
                   <template v-else-if="selectedItem.methodType === 'WEBHOOK'">
-                    <div class="col-12 col-md-3"><q-select :model-value="selectedItem.extraction.httpMethod ?? 'POST'" :options="httpMethods" :label="t('collectors.acquisition.httpMethod')" emit-value map-options @update:model-value="updateExtractionField('httpMethod', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-input :model-value="selectedItem.extraction.endpoint ?? ''" :label="t('collectors.acquisition.endpoint')" @update:model-value="updateExtractionField('endpoint', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-select :model-value="selectedItem.extraction.responseFormat ?? 'JSON'" :options="responseFormats" :label="t('collectors.acquisition.format')" emit-value map-options @update:model-value="updateExtractionField('responseFormat', $event as string)" /></div>
-                    <div class="col-12 col-md-3"><q-input :model-value="selectedItem.extraction.selector ?? ''" :label="t('collectors.acquisition.dataPath')" @update:model-value="updateExtractionField('selector', $event as string)" /></div>
+                    <div class="col-12 col-md-3">
+                      <q-select
+                        :model-value="selectedItem.extraction.httpMethod ?? 'POST'"
+                        :options="httpMethods"
+                        :label="t('collectors.acquisition.httpMethod')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateExtractionField('httpMethod', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-input
+                        :model-value="selectedItem.extraction.endpoint ?? ''"
+                        :label="t('collectors.acquisition.endpoint')"
+                        @update:model-value="updateExtractionField('endpoint', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-select
+                        :model-value="selectedItem.extraction.responseFormat ?? 'JSON'"
+                        :options="responseFormats"
+                        :label="t('collectors.acquisition.format')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateExtractionField('responseFormat', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-input
+                        :model-value="selectedItem.extraction.selector ?? ''"
+                        :label="t('collectors.acquisition.dataPath')"
+                        @update:model-value="updateExtractionField('selector', $event as string)"
+                      />
+                    </div>
                   </template>
 
                   <template v-else>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.extraction.endpoint ?? ''" :label="t('collectors.acquisition.endpoint')" @update:model-value="updateExtractionField('endpoint', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-input :model-value="selectedItem.extraction.selector ?? ''" :label="t('collectors.acquisition.dataPath')" @update:model-value="updateExtractionField('selector', $event as string)" /></div>
-                    <div class="col-12 col-md-4"><q-select :model-value="selectedItem.extraction.responseFormat ?? 'JSON'" :options="responseFormats" :label="t('collectors.acquisition.format')" emit-value map-options @update:model-value="updateExtractionField('responseFormat', $event as string)" /></div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.extraction.endpoint ?? ''"
+                        :label="t('collectors.acquisition.endpoint')"
+                        @update:model-value="updateExtractionField('endpoint', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-input
+                        :model-value="selectedItem.extraction.selector ?? ''"
+                        :label="t('collectors.acquisition.dataPath')"
+                        @update:model-value="updateExtractionField('selector', $event as string)"
+                      />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <q-select
+                        :model-value="selectedItem.extraction.responseFormat ?? 'JSON'"
+                        :options="responseFormats"
+                        :label="t('collectors.acquisition.format')"
+                        emit-value
+                        map-options
+                        @update:model-value="updateExtractionField('responseFormat', $event as string)"
+                      />
+                    </div>
                   </template>
                 </div>
               </div>
             </q-card-section>
           </q-card>
 
-          <q-card v-if="validationSummary || testResult" flat bordered class="rounded-borders">
-            <q-card-section class="text-subtitle2 text-weight-medium">{{ t('collectors.acquisition.result') }}</q-card-section>
+          <q-card
+            v-if="validationSummary || testResult"
+            flat
+            bordered
+            class="rounded-borders"
+          >
+            <q-card-section class="text-subtitle2 text-weight-medium">
+              {{ t('collectors.acquisition.result') }}
+            </q-card-section>
             <q-separator />
             <q-card-section>
-              <div v-if="validationSummary" class="q-mb-md">
-                <div class="text-caption text-grey-6">{{ t('collectors.acquisition.validation') }}</div>
-                <div class="text-body2">{{ validationSummary }}</div>
+              <div
+                v-if="validationSummary"
+                class="q-mb-md"
+              >
+                <div class="text-caption text-grey-6">
+                  {{ t('collectors.acquisition.validation') }}
+                </div>
+                <div class="text-body2">
+                  {{ validationSummary }}
+                </div>
               </div>
               <div v-if="testResult">
-                <div class="text-caption text-grey-6">{{ t('collectors.acquisition.result') }}</div>
-                <div class="text-subtitle2">{{ testResult.status === 'SUCCESS' ? t('collectors.acquisition.successState') : t('collectors.acquisition.errorState') }}</div>
-                <div class="text-body2">{{ testResult.message }}</div>
-                <div v-if="testResult.value" class="text-body2">{{ t('collectors.acquisition.valueLabel') }}: {{ testResult.value }}</div>
+                <div class="text-caption text-grey-6">
+                  {{ t('collectors.acquisition.result') }}
+                </div>
+                <div class="text-subtitle2">
+                  {{ testResult.status === 'SUCCESS' ? t('collectors.acquisition.successState') : t('collectors.acquisition.errorState') }}
+                </div>
+                <div class="text-body2">
+                  {{ testResult.message }}
+                </div>
+                <div
+                  v-if="testResult.value"
+                  class="text-body2"
+                >
+                  {{ t('collectors.acquisition.valueLabel') }}: {{ testResult.value }}
+                </div>
               </div>
             </q-card-section>
           </q-card>
         </div>
 
-        <div v-else class="empty-panel">
-          <div class="text-h6">{{ t('collectors.acquisition.noSelection') }}</div>
-          <q-btn class="q-mt-md" color="primary" icon="add" :label="t('collectors.acquisition.newData')" @click="openCreateDialog" />
+        <div
+          v-else
+          class="empty-panel"
+        >
+          <div class="text-h6">
+            {{ t('collectors.acquisition.noSelection') }}
+          </div>
+          <q-btn
+            class="q-mt-md"
+            color="primary"
+            icon="add"
+            :label="t('collectors.acquisition.newData')"
+            @click="openCreateDialog"
+          />
         </div>
       </template>
     </q-splitter>
 
-    <q-dialog v-model="dialogOpen" persistent>
+    <q-dialog
+      v-model="dialogOpen"
+      persistent
+    >
       <q-card style="min-width: 420px; max-width: 560px; width: 92vw;">
         <q-card-section class="row items-center justify-between">
-          <div class="text-h6">{{ dialogMode === 'create' ? t('collectors.acquisition.newData') : t('collectors.acquisition.editData') }}</div>
-          <q-btn flat round dense icon="close" v-close-popup @click="dialogOpen = false" />
+          <div class="text-h6">
+            {{ dialogMode === 'create' ? t('collectors.acquisition.newData') : t('collectors.acquisition.editData') }}
+          </div>
+          <q-btn
+            v-close-popup
+            flat
+            round
+            dense
+            icon="close"
+            @click="dialogOpen = false"
+          />
         </q-card-section>
 
         <q-separator />
 
         <q-card-section class="q-gutter-md">
-          <q-input v-model="formModel.name" :label="t('collectors.acquisition.dataName')" />
-          <q-input v-model="formModel.description" type="textarea" :label="t('collectors.acquisition.description')" />
-          <q-select v-model="formModel.status" :options="statusOptions" :label="t('collectors.acquisition.status')" emit-value map-options />
+          <q-input
+            v-model="formModel.name"
+            :label="t('collectors.acquisition.dataName')"
+          />
+          <q-input
+            v-model="formModel.description"
+            type="textarea"
+            :label="t('collectors.acquisition.description')"
+          />
+          <q-select
+            v-model="formModel.status"
+            :options="statusOptions"
+            :label="t('collectors.acquisition.status')"
+            emit-value
+            map-options
+          />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat :label="t('common.cancel')" color="primary" @click="dialogOpen = false" />
-          <q-btn color="primary" :label="t('common.save')" @click="saveItemFromDialog" />
+          <q-btn
+            flat
+            :label="t('common.cancel')"
+            color="primary"
+            @click="dialogOpen = false"
+          />
+          <q-btn
+            color="primary"
+            :label="t('common.save')"
+            @click="saveItemFromDialog"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>

@@ -6,12 +6,26 @@
     <p class="step-description">
       {{ t('installation.save.description', { companyId }) }}
     </p>
-    <q-banner v-if="saveFailed" rounded class="status-banner q-mb-md">
-      <template #avatar><q-icon name="error" color="negative" /></template>
+    <q-banner
+      v-if="saveFailed"
+      rounded
+      class="status-banner q-mb-md"
+    >
+      <template #avatar>
+        <q-icon
+          name="error"
+          color="negative"
+        />
+      </template>
       {{ t('installation.save.error') }}
     </q-banner>
     <div class="step-actions step-actions-split">
-      <q-btn flat :label="t('common.back')" icon="arrow_back" @click="emit('back')" />
+      <q-btn
+        flat
+        :label="t('common.back')"
+        icon="arrow_back"
+        @click="emit('back')"
+      />
       <q-btn
         color="primary"
         unelevated

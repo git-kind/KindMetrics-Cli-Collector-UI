@@ -1,9 +1,15 @@
 <template>
-  <q-form ref="formRef" class="step-content" @submit.prevent="continueToDatabase">
+  <q-form
+    ref="formRef"
+    class="step-content"
+    @submit.prevent="continueToDatabase"
+  >
     <div class="text-subtitle1 text-weight-medium q-mb-sm">
       {{ t('installation.company.title') }}
     </div>
-    <p class="step-description">{{ t('installation.company.description') }}</p>
+    <p class="step-description">
+      {{ t('installation.company.description') }}
+    </p>
     <q-input
       :model-value="companyId"
       outlined
@@ -15,14 +21,38 @@
       @update:model-value="emit('update:companyId', String($event ?? ''))"
       @blur="emit('resolve-company')"
     />
-    <q-banner v-if="company" rounded class="company-banner q-mt-md">
-      <template #avatar><q-icon name="domain" color="primary" /></template>
-      <div class="text-weight-medium">{{ company.name }}</div>
-      <div class="text-caption">{{ t('installation.company.code') }}: {{ company.code }}</div>
-      <div class="text-caption">{{ t('installation.company.companyId') }}: {{ company.id }}</div>
+    <q-banner
+      v-if="company"
+      rounded
+      class="company-banner q-mt-md"
+    >
+      <template #avatar>
+        <q-icon
+          name="domain"
+          color="primary"
+        />
+      </template>
+      <div class="text-weight-medium">
+        {{ company.name }}
+      </div>
+      <div class="text-caption">
+        {{ t('installation.company.code') }}: {{ company.code }}
+      </div>
+      <div class="text-caption">
+        {{ t('installation.company.companyId') }}: {{ company.id }}
+      </div>
     </q-banner>
-    <q-banner v-else-if="companyLookupFailed" rounded class="status-banner q-mt-md">
-      <template #avatar><q-icon name="search_off" color="negative" /></template>
+    <q-banner
+      v-else-if="companyLookupFailed"
+      rounded
+      class="status-banner q-mt-md"
+    >
+      <template #avatar>
+        <q-icon
+          name="search_off"
+          color="negative"
+        />
+      </template>
       {{ t('installation.company.notFound') }}
     </q-banner>
     <div class="step-actions">

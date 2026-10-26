@@ -1,12 +1,25 @@
 <template>
   <div>
     <div class="row items-center q-mb-lg">
-      <q-btn flat round icon="arrow_back" :aria-label="t('collectors.actions.back')" :to="{ name: 'collectors' }">
+      <q-btn
+        flat
+        round
+        icon="arrow_back"
+        :aria-label="t('collectors.actions.back')"
+        :to="{ name: 'collectors' }"
+      >
         <q-tooltip>{{ t('collectors.actions.back') }}</q-tooltip>
       </q-btn>
       <div class="q-ml-sm">
-        <div class="text-h5 text-weight-bold">{{ collector ? collector.name : t('collectors.detail.title') }}</div>
-        <div v-if="collector" class="km-muted">{{ collector.code }}</div>
+        <div class="text-h5 text-weight-bold">
+          {{ collector ? collector.name : t('collectors.detail.title') }}
+        </div>
+        <div
+          v-if="collector"
+          class="km-muted"
+        >
+          {{ collector.code }}
+        </div>
       </div>
       <q-space />
       <q-badge
@@ -16,24 +29,51 @@
       />
     </div>
 
-    <q-banner v-if="!can('collector.view')" rounded class="bg-warning text-dark q-mb-md">
+    <q-banner
+      v-if="!can('collector.view')"
+      rounded
+      class="bg-warning text-dark q-mb-md"
+    >
       {{ t('common.accessDenied') }}
     </q-banner>
 
-    <q-banner v-else-if="error" rounded class="bg-negative text-white q-mb-md">
-      <template #avatar><q-icon name="error" /></template>
+    <q-banner
+      v-else-if="error"
+      rounded
+      class="bg-negative text-white q-mb-md"
+    >
+      <template #avatar>
+        <q-icon name="error" />
+      </template>
       {{ t('collectors.errors.detail') }}
       <template #action>
-        <q-btn flat color="white" :label="t('common.retry')" @click="loadCollector" />
+        <q-btn
+          flat
+          color="white"
+          :label="t('common.retry')"
+          @click="loadCollector"
+        />
       </template>
     </q-banner>
 
-    <div v-else-if="loading" class="row justify-center q-pa-xl">
-      <q-spinner color="primary" size="42px" />
+    <div
+      v-else-if="loading"
+      class="row justify-center q-pa-xl"
+    >
+      <q-spinner
+        color="primary"
+        size="42px"
+      />
     </div>
 
-    <q-banner v-else-if="notFound" rounded class="bg-grey-2 text-grey-9">
-      <template #avatar><q-icon name="search_off" /></template>
+    <q-banner
+      v-else-if="notFound"
+      rounded
+      class="bg-grey-2 text-grey-9"
+    >
+      <template #avatar>
+        <q-icon name="search_off" />
+      </template>
       {{ t('collectors.errors.notFound') }}
     </q-banner>
 
@@ -47,38 +87,96 @@
         indicator-color="primary"
         class="collector-detail-tabs"
       >
-        <q-tab name="general" icon="info" :label="t('collectors.tabs.general')" />
-        <q-tab name="dataStructure" icon="storage" :label="t('collectors.tabs.dataStructure')" />
-        <q-tab name="mapping" icon="transform" :label="t('collectors.tabs.mapping')" />
-        <q-tab name="execution" icon="play_arrow" :label="t('collectors.tabs.execution')" />
-        <q-tab name="logs" icon="receipt_long" :label="t('collectors.tabs.logs')" />
-        <q-tab name="synchronization" icon="sync" :label="t('collectors.tabs.synchronization')" />
+        <q-tab
+          name="general"
+          icon="info"
+          :label="t('collectors.tabs.general')"
+        />
+        <q-tab
+          name="dataStructure"
+          icon="storage"
+          :label="t('collectors.tabs.dataStructure')"
+        />
+        <q-tab
+          name="mapping"
+          icon="transform"
+          :label="t('collectors.tabs.mapping')"
+        />
+        <q-tab
+          name="execution"
+          icon="play_arrow"
+          :label="t('collectors.tabs.execution')"
+        />
+        <q-tab
+          name="logs"
+          icon="receipt_long"
+          :label="t('collectors.tabs.logs')"
+        />
+        <q-tab
+          name="synchronization"
+          icon="sync"
+          :label="t('collectors.tabs.synchronization')"
+        />
       </q-tabs>
 
       <q-separator />
 
-      <q-tab-panels v-model="activeTab" animated class="bg-transparent">
-        <q-tab-panel name="general" class="q-px-none">
+      <q-tab-panels
+        v-model="activeTab"
+        animated
+        class="bg-transparent"
+      >
+        <q-tab-panel
+          name="general"
+          class="q-px-none"
+        >
           <CollectorGeneralSection
             :collector="collector"
             :equipment-name="referenceName('equipment', collector.equipmentId)"
             :extraction-methods="extractionMethods"
           />
         </q-tab-panel>
-        <q-tab-panel name="dataStructure" class="q-px-none">
+        <q-tab-panel
+          name="dataStructure"
+          class="q-px-none"
+        >
           <CollectorDataStructureSection :collector="collector" />
         </q-tab-panel>
-        <q-tab-panel name="mapping" class="q-px-none">
-          <CollectorMappingSection :collector="collector" :extraction-methods="extractionMethods" />
+        <q-tab-panel
+          name="mapping"
+          class="q-px-none"
+        >
+          <CollectorMappingSection
+            :collector="collector"
+            :extraction-methods="extractionMethods"
+          />
         </q-tab-panel>
-        <q-tab-panel name="execution" class="q-px-none">
-          <CollectorExecutionSection :collector="collector" @executed="refreshExecution" />
+        <q-tab-panel
+          name="execution"
+          class="q-px-none"
+        >
+          <CollectorExecutionSection
+            :collector="collector"
+            @executed="refreshExecution"
+          />
         </q-tab-panel>
-        <q-tab-panel name="logs" class="q-px-none">
-          <CollectorLogsSection v-if="logs" :logs="logs" />
+        <q-tab-panel
+          name="logs"
+          class="q-px-none"
+        >
+          <CollectorLogsSection
+            v-if="logs"
+            :logs="logs"
+          />
         </q-tab-panel>
-        <q-tab-panel name="synchronization" class="q-px-none">
-          <CollectorSynchronizationSection :collector="collector" @synchronized="refreshExecution" />
+        <q-tab-panel
+          name="synchronization"
+          class="q-px-none"
+        >
+          <CollectorSynchronizationSection
+            :collector="collector"
+            @synchronized="refreshExecution"
+          />
         </q-tab-panel>
       </q-tab-panels>
     </template>

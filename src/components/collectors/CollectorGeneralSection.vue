@@ -1,25 +1,43 @@
 <template>
-  <q-card flat bordered class="rounded-borders">
+  <q-card
+    flat
+    bordered
+    class="rounded-borders"
+  >
     <q-card-section class="q-pb-sm">
-      <div class="text-subtitle1 text-weight-medium">{{ t('collectors.general.title') }}</div>
+      <div class="text-subtitle1 text-weight-medium">
+        {{ t('collectors.general.title') }}
+      </div>
     </q-card-section>
     <q-separator />
-    <q-list bordered separator>
-      <q-item v-for="item in items" :key="item.label">
+    <q-list
+      bordered
+      separator
+    >
+      <q-item
+        v-for="item in items"
+        :key="item.label"
+      >
         <q-item-section>
-          <q-item-label caption>{{ item.label }}</q-item-label>
+          <q-item-label caption>
+            {{ item.label }}
+          </q-item-label>
           <q-item-label>{{ item.value }}</q-item-label>
         </q-item-section>
       </q-item>
       <q-item>
         <q-item-section>
-          <q-item-label caption>{{ t('collectors.extraction.methods') }}</q-item-label>
+          <q-item-label caption>
+            {{ t('collectors.extraction.methods') }}
+          </q-item-label>
           <q-item-label>{{ extractionMethodNames.join(', ') || t('common.notAvailable') }}</q-item-label>
         </q-item-section>
       </q-item>
       <q-item>
         <q-item-section>
-          <q-item-label caption>{{ t('collectors.extraction.selectedData') }}</q-item-label>
+          <q-item-label caption>
+            {{ t('collectors.extraction.selectedData') }}
+          </q-item-label>
           <q-item-label>{{ selectedDataNames.join(', ') || t('common.notAvailable') }}</q-item-label>
         </q-item-section>
       </q-item>
@@ -31,7 +49,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Collector } from 'src/models/collector';
-import type { ExtractionMethod } from 'src/models/extraction-method';
+import { getAvailableDataFromMethod, type ExtractionMethod } from 'src/models/extraction-method';
 
 const props = defineProps<{
   collector: Collector;
@@ -41,10 +59,10 @@ const props = defineProps<{
 const { t } = useI18n();
 const extractionMethodNames = computed(() => (props.extractionMethods ?? [])
   .filter((method) => props.collector.extractionMethodIds.includes(method.id))
-  .map((method) => `${t(`extractionMethods.types.${method.type}`)} - ${method.name}`));
+  .map((method) => `${method.protocol} - ${method.name}`));
 const selectedDataNames = computed(() => (props.extractionMethods ?? [])
   .filter((method) => props.collector.extractionMethodIds.includes(method.id))
-  .flatMap((method) => method.availableData)
+  .flatMap(getAvailableDataFromMethod)
   .filter((item) => props.collector.selectedData.includes(item.id))
   .map((item) => item.name));
 

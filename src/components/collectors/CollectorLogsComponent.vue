@@ -1,7 +1,15 @@
 <template>
   <div>
-    <q-banner rounded class="bg-blue-grey-1 text-blue-grey-10 q-mb-md">
-      <template #avatar><q-icon name="info" color="primary" /></template>
+    <q-banner
+      rounded
+      class="bg-blue-grey-1 text-blue-grey-10 q-mb-md"
+    >
+      <template #avatar>
+        <q-icon
+          name="info"
+          color="primary"
+        />
+      </template>
       {{ t('collectors.logs.mockNotice') }}
     </q-banner>
     <q-table
@@ -15,7 +23,10 @@
     >
       <template #body-cell-level="slotProps">
         <q-td :props="slotProps">
-          <q-badge :color="levelColor(slotProps.value)" :label="t(`collectors.logs.levels.${String(slotProps.value).toLowerCase()}`)" />
+          <q-badge
+            :color="levelColor(slotProps.value)"
+            :label="t(`collectors.logs.levels.${String(slotProps.value).toLowerCase()}`)"
+          />
         </q-td>
       </template>
     </q-table>

@@ -1,11 +1,18 @@
 <template>
   <div>
-    <div class="text-h5 q-mb-lg">{{ t('settings.title') }}</div>
+    <div class="text-h5 q-mb-lg">
+      {{ t('settings.title') }}
+    </div>
 
     <div class="row q-col-gutter-lg">
       <div class="col-12 col-md-6">
-        <q-card flat class="km-card q-pa-lg">
-          <div class="text-h6 q-mb-md">{{ t('settings.interface') }}</div>
+        <q-card
+          flat
+          class="km-card q-pa-lg"
+        >
+          <div class="text-h6 q-mb-md">
+            {{ t('settings.interface') }}
+          </div>
           <q-select
             v-model="language"
             outlined
@@ -29,13 +36,27 @@
       </div>
 
       <div class="col-12 col-md-6">
-        <q-card flat class="km-card q-pa-lg">
-          <div class="text-h6 q-mb-md">{{ t('settings.branding') }}</div>
+        <q-card
+          flat
+          class="km-card q-pa-lg"
+        >
+          <div class="text-h6 q-mb-md">
+            {{ t('settings.branding') }}
+          </div>
           <div class="row items-center q-gutter-md">
-            <img v-if="company" :src="company.logo" alt="Company logo" class="company-logo" />
+            <img
+              v-if="company"
+              :src="company.logo"
+              alt="Company logo"
+              class="company-logo"
+            >
             <div>
-              <div class="text-subtitle1 text-weight-medium">{{ company?.name ?? '' }}</div>
-              <div class="km-muted text-caption">Company branding Mock</div>
+              <div class="text-subtitle1 text-weight-medium">
+                {{ company?.name ?? '' }}
+              </div>
+              <div class="km-muted text-caption">
+                Company branding Mock
+              </div>
             </div>
           </div>
         </q-card>

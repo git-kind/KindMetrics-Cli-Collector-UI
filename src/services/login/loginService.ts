@@ -1,5 +1,5 @@
 import { login as loginRepository } from 'src/repositories/login.repository';
-import { establishAuthSession } from 'src/services/session/authSession';
+import { establishAuthSession } from 'src/services/session/sessionService';
 
 export interface LoginPayload {
   email: string;

@@ -1,41 +1,103 @@
 <template>
   <div class="q-gutter-md">
-    <q-card flat bordered class="rounded-borders">
+    <q-card
+      flat
+      bordered
+      class="rounded-borders"
+    >
       <q-card-section class="row items-center justify-between">
-        <div class="text-subtitle1 text-weight-medium">{{ t('collectors.mapping.title') }}</div>
-        <q-btn flat color="primary" icon="add" :label="t('collectors.mapping.addRule')" @click="openCreateDialog" />
+        <div class="text-subtitle1 text-weight-medium">
+          {{ t('collectors.mapping.title') }}
+        </div>
+        <q-btn
+          flat
+          color="primary"
+          icon="add"
+          :label="t('collectors.mapping.addRule')"
+          @click="openCreateDialog"
+        />
       </q-card-section>
 
-      <q-table flat bordered row-key="id" :rows="rows" :columns="columns" :pagination="{ rowsPerPage: 10 }">
-        <template #body-cell-logicalField="props">
-          <q-td :props="props">{{ dataName(String(props.row.dataId)) }}</q-td>
+      <q-table
+        flat
+        bordered
+        row-key="id"
+        :rows="rows"
+        :columns="columns"
+        :pagination="{ rowsPerPage: 10 }"
+      >
+        <template #body-cell-logicalField="cellProps">
+          <q-td :props="cellProps">
+            {{ dataName(String(cellProps.row.dataId)) }}
+          </q-td>
         </template>
-        <template #body-cell-sourceMethod="props">
-          <q-td :props="props">{{ methodName(String(props.row.acquisitionMethodId)) }}</q-td>
+        <template #body-cell-sourceMethod="cellProps">
+          <q-td :props="cellProps">
+            {{ methodName(String(cellProps.row.acquisitionMethodId)) }}
+          </q-td>
         </template>
-        <template #body-cell-status="props">
-          <q-td :props="props">
-            <q-badge :color="statusColor(props.value)" :label="statusLabel(props.value)" />
+        <template #body-cell-status="cellProps">
+          <q-td :props="cellProps">
+            <q-badge
+              :color="statusColor(cellProps.value)"
+              :label="statusLabel(cellProps.value)"
+            />
           </q-td>
         </template>
 
-        <template #body-cell-actions="props">
-          <q-td :props="props">
+        <template #body-cell-actions="cellProps">
+          <q-td :props="cellProps">
             <div class="row q-gutter-xs">
-              <q-btn flat round dense icon="visibility" color="primary" :title="t('collectors.mapping.view')" @click="openDetail(props.row)" />
-              <q-btn flat round dense icon="edit" color="primary" :title="t('collectors.mapping.edit')" @click="openEditDialog(props.row)" />
-              <q-btn flat round dense icon="delete" color="negative" :title="t('collectors.mapping.delete')" @click="deleteMapping(props.row)" />
+              <q-btn
+                flat
+                round
+                dense
+                icon="visibility"
+                color="primary"
+                :title="t('collectors.mapping.view')"
+                @click="openDetail(cellProps.row)"
+              />
+              <q-btn
+                flat
+                round
+                dense
+                icon="edit"
+                color="primary"
+                :title="t('collectors.mapping.edit')"
+                @click="openEditDialog(cellProps.row)"
+              />
+              <q-btn
+                flat
+                round
+                dense
+                icon="delete"
+                color="negative"
+                :title="t('collectors.mapping.delete')"
+                @click="deleteMapping(cellProps.row)"
+              />
             </div>
           </q-td>
         </template>
       </q-table>
     </q-card>
 
-    <q-dialog v-model="dialogOpen" persistent>
+    <q-dialog
+      v-model="dialogOpen"
+      persistent
+    >
       <q-card class="mapping-form-dialog">
         <q-card-section class="row items-center justify-between">
-          <div class="text-h6">{{ isEditing ? t('collectors.mapping.editRule') : t('collectors.mapping.newRule') }}</div>
-          <q-btn flat round dense icon="close" v-close-popup @click="closeDialog" />
+          <div class="text-h6">
+            {{ isEditing ? t('collectors.mapping.editRule') : t('collectors.mapping.newRule') }}
+          </div>
+          <q-btn
+            v-close-popup
+            flat
+            round
+            dense
+            icon="close"
+            @click="closeDialog"
+          />
         </q-card-section>
 
         <q-separator />
@@ -53,7 +115,9 @@
           />
 
           <div class="q-gutter-sm">
-            <div class="text-subtitle2 text-weight-medium">{{ t('collectors.mapping.origin') }}</div>
+            <div class="text-subtitle2 text-weight-medium">
+              {{ t('collectors.mapping.origin') }}
+            </div>
             <q-select
               v-model="form.acquisitionMethodId"
               :options="sourceMethodOptions"
@@ -74,7 +138,9 @@
           </div>
 
           <div class="q-gutter-sm">
-            <div class="text-subtitle2 text-weight-medium">{{ t('collectors.mapping.transformation') }}</div>
+            <div class="text-subtitle2 text-weight-medium">
+              {{ t('collectors.mapping.transformation') }}
+            </div>
             <q-select
               v-model="form.transformation"
               :options="transformationOptions"
@@ -96,7 +162,9 @@
           </div>
 
           <div class="q-gutter-sm">
-            <div class="text-subtitle2 text-weight-medium">{{ t('collectors.mapping.destination') }}</div>
+            <div class="text-subtitle2 text-weight-medium">
+              {{ t('collectors.mapping.destination') }}
+            </div>
             <q-select
               v-model="form.destinationTable"
               :options="destinationTableOptions"
@@ -116,72 +184,164 @@
             />
           </div>
 
-          <q-banner v-if="formError" rounded class="bg-negative text-white">
+          <q-banner
+            v-if="formError"
+            rounded
+            class="bg-negative text-white"
+          >
             {{ formError }}
           </q-banner>
         </q-card-section>
 
-        <q-card-actions align="right" class="q-pa-md">
-          <q-btn flat :label="t('common.cancel')" color="primary" @click="closeDialog" />
-          <q-btn color="primary" :label="t('common.save')" @click="submitForm" />
+        <q-card-actions
+          align="right"
+          class="q-pa-md"
+        >
+          <q-btn
+            flat
+            :label="t('common.cancel')"
+            color="primary"
+            @click="closeDialog"
+          />
+          <q-btn
+            color="primary"
+            :label="t('common.save')"
+            @click="submitForm"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="detailDialogOpen" persistent>
+    <q-dialog
+      v-model="detailDialogOpen"
+      persistent
+    >
       <q-card class="mapping-detail-dialog">
         <q-card-section class="row items-center justify-between">
-          <div class="text-h6">{{ t('collectors.mapping.detailTitle') }}</div>
-          <q-btn flat round dense icon="close" v-close-popup @click="detailDialogOpen = false" />
+          <div class="text-h6">
+            {{ t('collectors.mapping.detailTitle') }}
+          </div>
+          <q-btn
+            v-close-popup
+            flat
+            round
+            dense
+            icon="close"
+            @click="detailDialogOpen = false"
+          />
         </q-card-section>
 
         <q-separator />
 
-        <q-card-section v-if="selectedDetail" class="q-gutter-md">
+        <q-card-section
+          v-if="selectedDetail"
+          class="q-gutter-md"
+        >
           <div>
-            <div class="text-caption text-grey-6">{{ t('collectors.mapping.data') }}</div>
-            <div class="text-subtitle2">{{ dataName(selectedDetail.dataId) }}</div>
+            <div class="text-caption text-grey-6">
+              {{ t('collectors.mapping.data') }}
+            </div>
+            <div class="text-subtitle2">
+              {{ dataName(selectedDetail.dataId) }}
+            </div>
           </div>
 
           <div>
-            <div class="text-caption text-grey-6">{{ t('collectors.mapping.origin') }}</div>
-            <div class="text-body2">{{ t('collectors.mapping.sourceMethod') }}: {{ methodName(selectedDetail.acquisitionMethodId) }}</div>
-            <div class="text-body2">{{ t('collectors.mapping.sourceField') }}: {{ selectedDetail.sourceField }}</div>
+            <div class="text-caption text-grey-6">
+              {{ t('collectors.mapping.origin') }}
+            </div>
+            <div class="text-body2">
+              {{ t('collectors.mapping.sourceMethod') }}: {{ methodName(selectedDetail.acquisitionMethodId) }}
+            </div>
+            <div class="text-body2">
+              {{ t('collectors.mapping.sourceField') }}: {{ selectedDetail.sourceField }}
+            </div>
           </div>
 
           <div>
-            <div class="text-caption text-grey-6">{{ t('collectors.mapping.transformation') }}</div>
-            <div class="text-body2">{{ transformationLabel(selectedDetail.transformation) }}</div>
+            <div class="text-caption text-grey-6">
+              {{ t('collectors.mapping.transformation') }}
+            </div>
+            <div class="text-body2">
+              {{ transformationLabel(selectedDetail.transformation) }}
+            </div>
           </div>
 
           <div>
-            <div class="text-caption text-grey-6">{{ t('collectors.mapping.destination') }}</div>
-            <div class="text-body2">{{ t('collectors.mapping.targetTable') }}: {{ selectedDetail.destinationTable }}</div>
-            <div class="text-body2">{{ t('collectors.mapping.targetField') }}: {{ selectedDetail.destinationField }}</div>
+            <div class="text-caption text-grey-6">
+              {{ t('collectors.mapping.destination') }}
+            </div>
+            <div class="text-body2">
+              {{ t('collectors.mapping.targetTable') }}: {{ selectedDetail.destinationTable }}
+            </div>
+            <div class="text-body2">
+              {{ t('collectors.mapping.targetField') }}: {{ selectedDetail.destinationField }}
+            </div>
           </div>
 
           <div>
-            <div class="text-caption text-grey-6">{{ t('collectors.mapping.status') }}</div>
-            <q-badge :color="statusColor(selectedDetail.status)" :label="statusLabel(selectedDetail.status)" />
+            <div class="text-caption text-grey-6">
+              {{ t('collectors.mapping.status') }}
+            </div>
+            <q-badge
+              :color="statusColor(selectedDetail.status)"
+              :label="statusLabel(selectedDetail.status)"
+            />
           </div>
 
           <div v-if="detailTestResult">
-            <div class="text-caption text-grey-6">{{ t('collectors.mapping.test') }}</div>
-            <div class="text-body2">{{ detailTestResult.message }}</div>
-            <div v-if="detailTestResult.sampleValue !== undefined" class="text-body2">
+            <div class="text-caption text-grey-6">
+              {{ t('collectors.mapping.test') }}
+            </div>
+            <div class="text-body2">
+              {{ detailTestResult.message }}
+            </div>
+            <div
+              v-if="detailTestResult.sampleValue !== undefined"
+              class="text-body2"
+            >
               {{ t('collectors.mapping.sampleValue') }}: {{ detailTestResult.sampleValue }}
             </div>
-            <div v-if="detailTestResult.destinationValue" class="text-body2">
+            <div
+              v-if="detailTestResult.destinationValue"
+              class="text-body2"
+            >
               {{ t('collectors.mapping.result') }}: {{ detailTestResult.destinationValue }}
             </div>
           </div>
         </q-card-section>
 
-        <q-card-actions align="right" class="q-pa-md">
-          <q-btn flat :label="t('collectors.mapping.test')" color="secondary" @click="runMappingTest(selectedDetail)" v-if="selectedDetail" />
-          <q-btn flat :label="t('collectors.mapping.edit')" color="primary" @click="openEditDialog(selectedDetail)" v-if="selectedDetail" />
-          <q-btn flat :label="t('collectors.mapping.delete')" color="negative" @click="deleteMapping(selectedDetail)" v-if="selectedDetail" />
-          <q-btn flat :label="t('common.cancel')" color="primary" @click="detailDialogOpen = false" />
+        <q-card-actions
+          align="right"
+          class="q-pa-md"
+        >
+          <q-btn
+            v-if="selectedDetail"
+            flat
+            :label="t('collectors.mapping.test')"
+            color="secondary"
+            @click="runMappingTest(selectedDetail)"
+          />
+          <q-btn
+            v-if="selectedDetail"
+            flat
+            :label="t('collectors.mapping.edit')"
+            color="primary"
+            @click="openEditDialog(selectedDetail)"
+          />
+          <q-btn
+            v-if="selectedDetail"
+            flat
+            :label="t('collectors.mapping.delete')"
+            color="negative"
+            @click="deleteMapping(selectedDetail)"
+          />
+          <q-btn
+            flat
+            :label="t('common.cancel')"
+            color="primary"
+            @click="detailDialogOpen = false"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -193,7 +353,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import type { Collector, CollectorDataStructure } from 'src/models/collector';
-import type { ExtractionMethod } from 'src/models/extraction-method';
+import { getAvailableDataFromMethod, type ExtractionMethod } from 'src/models/extraction-method';
 import type {
   DataMapping,
   DataMappingFormValue,
@@ -230,14 +390,14 @@ const form = reactive<DataMappingFormValue>({
 
 const selectedMethodData = computed(() => props.extractionMethods
   .filter((method) => props.collector.extractionMethodIds.includes(method.id))
-  .flatMap((method) => method.availableData)
+  .flatMap(getAvailableDataFromMethod)
   .filter((item) => props.collector.selectedData.includes(item.id)));
 const dataOptions = computed(() => selectedMethodData.value.map((item) => ({ label: item.name, value: item.id })));
 const sourceMethodOptions = computed(() => props.extractionMethods
   .filter((method) => props.collector.extractionMethodIds.includes(method.id)
-    && method.availableData.some((item) => item.id === form.dataId))
+    && getAvailableDataFromMethod(method).some((item) => item.id === form.dataId))
   .map((method) => ({
-    label: `${t(`extractionMethods.types.${method.type}`)} - ${method.name}`,
+    label: `${method.protocol} - ${method.name}`,
     value: method.id,
   })));
 const sourceFieldOptions = computed(() => selectedMethodData.value
@@ -292,7 +452,7 @@ watch(
   (nextValue) => {
     const method = props.extractionMethods.find((candidate) =>
       props.collector.extractionMethodIds.includes(candidate.id)
-      && candidate.availableData.some((item) => item.id === nextValue));
+      && getAvailableDataFromMethod(candidate).some((item) => item.id === nextValue));
     form.acquisitionMethodId = method?.id ?? '';
     const values = selectedMethodData.value.filter((item) => item.id === nextValue).map((item) => item.name);
     if (!values.includes(form.sourceField)) {
@@ -360,7 +520,7 @@ function dataName(id: string): string {
 
 function methodName(id: string): string {
   const method = props.extractionMethods.find((item) => item.id === id);
-  return method ? `${t(`extractionMethods.types.${method.type}`)} - ${method.name}` : id;
+  return method ? `${method.protocol} - ${method.name}` : id;
 }
 
 function resetForm(): void {
