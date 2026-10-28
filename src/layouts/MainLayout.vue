@@ -205,6 +205,18 @@
 
         <q-item
           clickable
+          :to="{ name: 'services' }"
+          active-class="km-active"
+        >
+          <q-item-section avatar>
+            <q-icon name="miscellaneous_services" />
+          </q-item-section>
+          <q-item-section>{{ t('menu.services') }}</q-item-section>
+          <q-tooltip>{{ t('menu.services') }}</q-tooltip>
+        </q-item>
+
+        <q-item
+          clickable
           :to="{ name: 'extraction-methods' }"
           active-class="km-active"
         >

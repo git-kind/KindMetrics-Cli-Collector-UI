@@ -1,17 +1,5 @@
 <template>
   <div class="q-gutter-md">
-    <q-banner
-      rounded
-      class="bg-blue-grey-1 text-blue-grey-10"
-    >
-      <template #avatar>
-        <q-icon
-          name="info"
-          color="primary"
-        />
-      </template>
-      {{ t('collectors.health.mockNotice') }}
-    </q-banner>
     <q-list
       bordered
       separator

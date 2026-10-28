@@ -68,6 +68,7 @@ export interface CollectorDataStructure {
 export interface Collector {
 	id: string;
 	companyId: string;
+	serviceId: string;
 	name: string;
 	code: string;
 	description: string;
@@ -219,6 +220,7 @@ export type CollectorFormValue = Pick<
 	| 'name'
 	| 'code'
 	| 'description'
+	| 'serviceId'
 	| 'extractionMethodIds'
 	| 'selectedData'
 	| 'type'

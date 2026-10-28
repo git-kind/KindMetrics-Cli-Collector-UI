@@ -24,6 +24,7 @@ export const collectorsMock: Collector[] = [
   {
     id: 'co-1',
     companyId: 'demo',
+    serviceId: 'service-demo-snmp',
     name: 'ESBC CDR Collector',
     code: 'ESBC-2345',
     description: 'Adquisición de registros de llamadas del SBC.',
@@ -45,6 +46,7 @@ export const collectorsMock: Collector[] = [
   {
     id: 'co-2',
     companyId: 'demo',
+    serviceId: 'service-demo-graph',
     name: 'Teams Call Collector',
     code: 'Teams-Collector',
     description: 'Recolección de datos de llamadas de Teams.',
@@ -66,6 +68,7 @@ export const collectorsMock: Collector[] = [
   {
     id: 'co-3',
     companyId: 'demo',
+    serviceId: 'service-demo-snmp',
     name: 'Audiotec Telemetry Collector',
     code: 'Audiotec-A3456',
     description: 'Collector inactivo sin ejecuciones registradas.',

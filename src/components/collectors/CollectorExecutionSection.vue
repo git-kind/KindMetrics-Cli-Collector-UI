@@ -1,18 +1,5 @@
 <template>
   <div class="q-gutter-md">
-    <q-banner
-      rounded
-      class="bg-blue-grey-1 text-blue-grey-10"
-    >
-      <template #avatar>
-        <q-icon
-          name="info"
-          color="primary"
-        />
-      </template>
-      {{ t('collectors.execution.mockNotice') }}
-    </q-banner>
-
     <q-card
       flat
       bordered
@@ -56,12 +43,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import type { Collector } from 'src/models/collector';
 import { collectorService } from 'src/services/collector.service';
 
 const props = defineProps<{ collector: Collector }>();
 const emit = defineEmits<{ (event: 'executed'): void }>();
 const { t } = useI18n();
+const $q = useQuasar();
 const running = ref(false);
 
 const execution = computed(() => {
@@ -71,9 +60,9 @@ const execution = computed(() => {
     schedule: props.collector.schedule ?? 'Every 5 minutes',
     lastExecutionAt: props.collector.lastExecutionAt ?? t('common.notAvailable'),
     nextExecutionAt: props.collector.nextExecutionAt ?? t('common.notAvailable'),
-    result: props.collector.lastExecutionStatus ?? 'SUCCESS',
-    recordsObtained: Number(config.recordsObtained ?? 125),
-    recordsStored: Number(config.recordsStored ?? 125),
+    result: props.collector.lastExecutionStatus,
+    recordsObtained: toDisplayCount(config.recordsObtained),
+    recordsStored: toDisplayCount(config.recordsStored),
   };
 });
 
@@ -82,16 +71,25 @@ const items = computed(() => [
   { label: t('collectors.execution.schedule'), value: execution.value.schedule },
   { label: t('collectors.execution.lastExecution'), value: execution.value.lastExecutionAt },
   { label: t('collectors.execution.nextExecution'), value: execution.value.nextExecutionAt },
-  { label: t('collectors.execution.result'), value: t(`collectors.executionStatus.${execution.value.result.toLowerCase()}`) },
-  { label: t('collectors.execution.recordsObtained'), value: String(execution.value.recordsObtained) },
-  { label: t('collectors.execution.recordsStored'), value: String(execution.value.recordsStored) },
+  { label: t('collectors.execution.result'), value: execution.value.result ? t(`collectors.executionStatus.${execution.value.result.toLowerCase()}`) : t('common.notAvailable') },
+  { label: t('collectors.execution.recordsObtained'), value: execution.value.recordsObtained },
+  { label: t('collectors.execution.recordsStored'), value: execution.value.recordsStored },
 ]);
+
+function toDisplayCount(value: unknown): string {
+  const count = Number(value);
+  return value !== undefined && value !== null && Number.isFinite(count)
+    ? String(count)
+    : t('common.notAvailable');
+}
 
 async function runNow(): Promise<void> {
   running.value = true;
   try {
     await collectorService.executeCollector(props.collector.id);
     emit('executed');
+  } catch {
+    $q.notify({ type: 'negative', message: t('collectors.errors.operation') });
   } finally {
     running.value = false;
   }

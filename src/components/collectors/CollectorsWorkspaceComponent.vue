@@ -78,6 +78,11 @@
           {{ extractionMethodNames(slotProps.value) }}
         </q-td>
       </template>
+      <template #body-cell-serviceId="slotProps">
+        <q-td :props="slotProps">
+          {{ serviceName(slotProps.value) }}
+        </q-td>
+      </template>
       <template #body-cell-originVersionId="slotProps">
         <q-td :props="slotProps">
           {{ referenceName('originVersions', slotProps.value) }}
@@ -182,6 +187,7 @@
       v-model="formDialog"
       :collector="selectedCollector"
       :references="references"
+      :services="services"
       :extraction-methods="extractionMethods"
       :saving="saving"
       :error-message="formError"
@@ -206,8 +212,10 @@ import type {
   CollectorReferenceData,
 } from 'src/models/collector';
 import type { ExtractionMethod } from 'src/models/extraction-method';
+import type { Service } from 'src/models/services/Service';
 import { CollectorValidationError, collectorService } from 'src/services/collector.service';
 import { extractionMethodService } from 'src/services/extraction-method.service';
+import { serviceService } from 'src/services/services/serviceService';
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -217,6 +225,7 @@ const collectors = ref<Collector[]>([]);
 const filters = ref<CollectorFilters>({ search: '', status: 'ALL' });
 const references = ref<CollectorReferenceData>({ equipment: [], originVersions: [] });
 const extractionMethods = ref<ExtractionMethod[]>([]);
+const services = ref<Service[]>([]);
 const selectedCollector = ref<Collector | null>(null);
 const formDialog = ref(false);
 const loading = ref(false);
@@ -230,6 +239,7 @@ let listRequest = 0;
 const columns = computed<QTableColumn[]>(() => [
   { name: 'code', label: t('collectors.fields.code'), field: 'code', align: 'left', sortable: true },
   { name: 'name', label: t('collectors.fields.name'), field: 'name', align: 'left', sortable: true },
+  { name: 'serviceId', label: t('collectors.fields.service'), field: 'serviceId', align: 'left' },
   { name: 'extractionMethodIds', label: t('collectors.extraction.methods'), field: 'extractionMethodIds', align: 'left' },
   { name: 'equipmentId', label: t('collectors.fields.equipment'), field: 'equipmentId', align: 'left' },
   { name: 'originVersionId', label: t('collectors.fields.originVersion'), field: 'originVersionId', align: 'left' },
@@ -244,12 +254,14 @@ onMounted(() => void loadPage());
 async function loadPage(): Promise<void> {
   referencesLoading.value = true;
   try {
-    const [referenceData, methods] = await Promise.all([
+    const [referenceData, methods, serviceList] = await Promise.all([
       collectorService.getReferenceData(),
       extractionMethodService.listMethods(),
+      serviceService.listServices(),
     ]);
     references.value = referenceData;
     extractionMethods.value = methods;
+    services.value = serviceList;
     await loadCollectors();
   } catch {
     pageErrorMessage.value = 'collectors.errors.load';
@@ -287,6 +299,11 @@ function extractionMethodNames(value: unknown): string {
     .filter((method) => value.includes(method.id))
     .map((method) => `${method.protocol} - ${method.name}`)
     .join(', ') || t('common.notAvailable');
+}
+
+function serviceName(id: unknown): string {
+  if (typeof id !== 'string') return t('common.notAvailable');
+  return services.value.find((service) => service.id === id)?.name ?? t('common.notAvailable');
 }
 
 function executionStatusColor(status: string): string {

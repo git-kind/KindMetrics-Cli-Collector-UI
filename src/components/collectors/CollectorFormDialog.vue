@@ -53,6 +53,17 @@
             :placeholder="t('collectors.form.descriptionPlaceholder')"
           />
           <q-select
+            v-model="draft.serviceId"
+            outlined
+            emit-value
+            map-options
+            :options="serviceOptions"
+            option-label="label"
+            option-value="value"
+            :rules="[requiredRule]"
+            :label="t('collectors.fields.service')"
+          />
+          <q-select
             v-model="draft.extractionMethodIds"
             outlined
             multiple
@@ -169,12 +180,14 @@ import type {
   CollectorFormValue,
   CollectorReferenceData,
 } from 'src/models/collector';
+import type { Service } from 'src/models/services/Service';
 import { getAvailableDataFromMethod, type ExtractionMethod } from 'src/models/extraction-method';
 
 const props = defineProps<{
   modelValue: boolean;
   collector: Collector | null;
   references: CollectorReferenceData;
+  services: Service[];
   extractionMethods: ExtractionMethod[];
   saving: boolean;
   errorMessage: string;
@@ -191,6 +204,9 @@ const configurationJson = ref('{}');
 const isEditing = computed(() => props.collector !== null);
 const equipmentOptions = computed(() => props.references.equipment);
 const originVersionOptions = computed(() => props.references.originVersions);
+const serviceOptions = computed(() => props.services
+  .filter((service) => service.enabled && service.status === 'ACTIVE')
+  .map((service) => ({ label: `${service.name} (${service.type})`, value: service.id })));
 const extractionMethodOptions = computed(() => props.extractionMethods.map((method) => ({
   label: `${method.protocol} - ${method.name}`,
   value: method.id,
@@ -221,6 +237,7 @@ function emptyForm(): CollectorFormValue {
     code: '',
     name: '',
     description: '',
+    serviceId: '',
     extractionMethodIds: [],
     selectedData: [],
     type: null,
@@ -241,6 +258,7 @@ function formValueFromCollector(collector: Collector): CollectorFormValue {
     code: collector.code,
     name: collector.name,
     description: collector.description,
+    serviceId: collector.serviceId,
     extractionMethodIds: [...collector.extractionMethodIds],
     selectedData: [...collector.selectedData],
     type: collector.type,

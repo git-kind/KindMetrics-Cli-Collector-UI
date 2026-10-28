@@ -42,6 +42,7 @@ const routes = [
       { path: 'admin/companies', name: 'companies', component: () => import('../pages/company/CompaniesPage.vue') },
       { path: 'equipment', name: 'equipment', component: () => import('../pages/EquipmentPage.vue') },
       { path: 'origins', name: 'origins', component: () => import('../pages/OriginsPage.vue') },
+      { path: 'services', name: 'services', component: () => import('../pages/ServicesPage.vue') },
       { path: 'extraction-methods', name: 'extraction-methods', component: () => import('../pages/ExtractionMethodsPage.vue') },
       { path: 'collectors', name: 'collectors', component: () => import('../pages/CollectorsPage.vue') },
       { path: 'collectors/:id', name: 'collector-detail', component: () => import('../pages/CollectorDetailPage.vue') },

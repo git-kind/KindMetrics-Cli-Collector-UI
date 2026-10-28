@@ -108,6 +108,11 @@
           :label="t('collectors.tabs.execution')"
         />
         <q-tab
+          name="health"
+          icon="monitor_heart"
+          :label="t('collectors.tabs.health')"
+        />
+        <q-tab
           name="logs"
           icon="receipt_long"
           :label="t('collectors.tabs.logs')"
@@ -132,6 +137,7 @@
         >
           <CollectorGeneralSection
             :collector="collector"
+            :service-name="serviceName"
             :equipment-name="referenceName('equipment', collector.equipmentId)"
             :extraction-methods="extractionMethods"
           />
@@ -159,6 +165,22 @@
             :collector="collector"
             @executed="refreshExecution"
           />
+        </q-tab-panel>
+        <q-tab-panel
+          name="health"
+          class="q-px-none"
+        >
+          <CollectorHealthComponent
+            v-if="health"
+            :health="health"
+          />
+          <q-banner
+            v-else
+            rounded
+            class="bg-grey-2 text-grey-9"
+          >
+            {{ t('common.notAvailable') }}
+          </q-banner>
         </q-tab-panel>
         <q-tab-panel
           name="logs"
@@ -191,21 +213,27 @@ import { useAuthorization } from 'src/composables/useAuthorization';
 import CollectorDataStructureSection from './CollectorDataStructureSection.vue';
 import CollectorExecutionSection from './CollectorExecutionSection.vue';
 import CollectorGeneralSection from './CollectorGeneralSection.vue';
+import CollectorHealthComponent from './CollectorHealthComponent.vue';
 import CollectorLogsSection from './CollectorLogsSection.vue';
 import CollectorMappingSection from './CollectorMappingSection.vue';
 import CollectorSynchronizationSection from './CollectorSynchronizationSection.vue';
-import type { Collector, CollectorLogMock, CollectorReferenceData } from 'src/models/collector';
+import type { Collector, CollectorHealthMock, CollectorLogMock, CollectorReferenceData } from 'src/models/collector';
 import type { ExtractionMethod } from 'src/models/extraction-method';
+import type { Service } from 'src/models/services/Service';
 import { collectorService } from 'src/services/collector.service';
 import { extractionMethodService } from 'src/services/extraction-method.service';
+import { serviceService } from 'src/services/services/serviceService';
 
 const route = useRoute();
 const { t } = useI18n();
 const { can } = useAuthorization();
 const collector = ref<Collector | null>(null);
+const health = ref<CollectorHealthMock | null>(null);
 const logs = ref<CollectorLogMock[] | null>(null);
 const references = ref<CollectorReferenceData>({ equipment: [], originVersions: [] });
 const extractionMethods = ref<ExtractionMethod[]>([]);
+const services = ref<Service[]>([]);
+const serviceName = ref('');
 const activeTab = ref('general');
 const loading = ref(false);
 const error = ref(false);
@@ -232,16 +260,21 @@ async function loadCollector(): Promise<void> {
       notFound.value = true;
       return;
     }
-    const [referenceData, collectorLogs, methods] = await Promise.all([
+    const [referenceData, collectorLogs, methods, serviceList, collectorHealth] = await Promise.all([
       collectorService.getReferenceData(),
       collectorService.getCollectorLogs(id),
       extractionMethodService.listMethods(),
+      serviceService.listServices(),
+      collectorService.getCollectorHealth(id),
     ]);
     if (request !== requestSequence) return;
     collector.value = record;
     references.value = referenceData;
     logs.value = collectorLogs;
     extractionMethods.value = methods;
+    services.value = serviceList;
+    serviceName.value = serviceList.find((service) => service.id === record.serviceId)?.name ?? '';
+    health.value = collectorHealth;
   } catch {
     if (request === requestSequence) error.value = true;
   } finally {
@@ -256,12 +289,14 @@ function referenceName(kind: 'equipment' | 'originVersions', id: string | null):
 
 async function refreshExecution(): Promise<void> {
   const id = String(route.params.id ?? '');
-  const [updatedCollector, updatedLogs] = await Promise.all([
+  const [updatedCollector, updatedLogs, updatedHealth] = await Promise.all([
     collectorService.getCollector(id),
     collectorService.getCollectorLogs(id),
+    collectorService.getCollectorHealth(id),
   ]);
   if (updatedCollector) collector.value = updatedCollector;
   logs.value = updatedLogs;
+  health.value = updatedHealth;
 }
 </script>
 

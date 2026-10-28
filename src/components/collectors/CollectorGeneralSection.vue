@@ -28,6 +28,14 @@
       <q-item>
         <q-item-section>
           <q-item-label caption>
+            {{ t('collectors.fields.service') }}
+          </q-item-label>
+          <q-item-label>{{ serviceName || t('common.notAvailable') }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section>
+          <q-item-label caption>
             {{ t('collectors.extraction.methods') }}
           </q-item-label>
           <q-item-label>{{ extractionMethodNames.join(', ') || t('common.notAvailable') }}</q-item-label>
@@ -53,6 +61,7 @@ import { getAvailableDataFromMethod, type ExtractionMethod } from 'src/models/ex
 
 const props = defineProps<{
   collector: Collector;
+  serviceName?: string | null;
   equipmentName?: string | null;
   extractionMethods?: ExtractionMethod[];
 }>();
